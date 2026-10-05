@@ -57,14 +57,6 @@ Detachable only. Git history has the exact diffs.
 - **Status:** Not yet confirmed across a suspend/resume.
 - **Remove when:** A kernel update fixes the DMIC resume.
 
-### No window transparency — 2026-10-05
-- **File:** `home/.config/hypr/extras/60-dell-latitude-7350-detachable.lua`
-- **Change:** `o.window(".*", { opacity = "1 1" })`, loaded after Omarchy's
-  rules (Omarchy default: `0.985 0.96`; browsers `1.0 0.985`).
-- **Why:** Chromium showed light-leak/faded-polarizer-like artifacts that
-  appear to come from window transparency on this machine. Transparency isn't
-  wanted anyway.
-
 ## Known issues (not config changes)
 
 - **Internal mic (RT1713, SoundWire link 3) can lock up** — 2026-10-04. Opening
@@ -73,3 +65,7 @@ Detachable only. Git history has the exact diffs.
   the UCM `HiFi` profile cannot initialise and there is no audio output at all.
   A reboot resets it. Recurred after a resume on 2026-10-05; the internal mic is
   now disabled (see "Disable the internal mic" above).
+
+- **Chromium display artifacts** — 2026-10-05. Light-leak / faded-polarizer-like
+  artifacts in Chromium. Not caused by window transparency: they remained with
+  every window forced opaque, so that override was removed.

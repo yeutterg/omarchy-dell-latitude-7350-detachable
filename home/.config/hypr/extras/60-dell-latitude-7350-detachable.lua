@@ -39,8 +39,3 @@ o.bind("XF86AudioRaiseVolume", "Volume up", volume_press("raise"), { locked = tr
 o.bind("XF86AudioLowerVolume", "Volume down", volume_press("lower"), { locked = true })
 o.bind("XF86AudioRaiseVolume", nil, volume_release, { locked = true, release = true })
 o.bind("XF86AudioLowerVolume", nil, volume_release, { locked = true, release = true })
-
--- No window transparency. Omarchy's default opacity (0.985 active / 0.96
--- inactive; browsers 1.0 / 0.985) showed as light-leak-like artifacts in
--- Chromium on this panel. This rule loads after Omarchy's, so it wins.
-o.window(".*", { opacity = "1 1" })

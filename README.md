@@ -13,7 +13,6 @@ that too; this repo loads after it.
 |---|---|
 | [Audio fixes](#audio-fixes) | Working sound: WirePlumber's camera monitor and the flaky internal mic are disabled |
 | [Volume buttons](#volume-buttons) | One step per tap, repeat only when held |
-| [No transparency](#no-transparency) | All windows fully opaque |
 | [Ollama on the GPU](#ollama-on-the-gpu) | Vulkan backend and integrated-GPU support for Ollama |
 
 ### Audio fixes
@@ -28,10 +27,6 @@ that too; this repo loads after it.
 The side buttons report their release ~470 ms late, so Hyprland's key repeat
 turned one tap into several steps. Now a press steps 5% once and only repeats
 after a 600 ms hold.
-
-### No transparency
-Omarchy's slight window transparency showed as light-leak artifacts in Chromium
-on this panel, so every window is fully opaque.
 
 ### Ollama on the GPU
 - Installs `ollama-vulkan`, Ollama's Vulkan backend, which runs on the Meteor
