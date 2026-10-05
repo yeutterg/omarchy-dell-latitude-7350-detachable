@@ -3,6 +3,18 @@
 Every intentional deviation from what Omarchy ships, for the Dell Latitude 7350
 Detachable only. Git history has the exact diffs.
 
+### Ollama on the integrated GPU — 2026-10-05
+- **Files:** `packages.txt`, `system/ollama-igpu.conf` (installed to
+  `/etc/systemd/system/ollama.service.d/igpu.conf`), `install.sh`.
+- **Change:** Installs `ollama-vulkan` and sets `OLLAMA_IGPU_ENABLE=1` for
+  `ollama.service`. `install.sh` now installs missing packages instead of only
+  listing them. Omarchy ships no Ollama.
+- **Why:** The Intel Meteor Lake graphics have no CUDA or ROCm; Vulkan through
+  Mesa is the backend that runs on them. Ollama skips integrated GPUs unless
+  told otherwise. Kept here because the right backend depends on the GPU.
+- **Cost:** ~55 MB. `install.sh` asks for sudo.
+- **Watch:** `journalctl -u ollama` should list a Vulkan device at startup.
+
 ### Disable WirePlumber's V4L2 camera monitor — 2026-10-04
 - **File:** `home/.config/wireplumber/wireplumber.conf.d/disable-v4l2-monitor.conf`
 - **Change:** `wireplumber.profiles.main.monitor.v4l2 = disabled`.

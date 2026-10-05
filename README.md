@@ -14,6 +14,7 @@ that too; this repo loads after it.
 | [Audio fixes](#audio-fixes) | Working sound: WirePlumber's camera monitor and the flaky internal mic are disabled |
 | [Volume buttons](#volume-buttons) | One step per tap, repeat only when held |
 | [No transparency](#no-transparency) | All windows fully opaque |
+| [Ollama on the GPU](#ollama-on-the-gpu) | Vulkan backend and integrated-GPU support for Ollama |
 
 ### Audio fixes
 - **Camera monitor off:** WirePlumber stalls on the IPU6 camera's raw nodes,
@@ -32,6 +33,14 @@ after a 600 ms hold.
 Omarchy's slight window transparency showed as light-leak artifacts in Chromium
 on this panel, so every window is fully opaque.
 
+### Ollama on the GPU
+- Installs `ollama-vulkan`, Ollama's Vulkan backend, which runs on the Meteor
+  Lake integrated graphics through Mesa.
+- Ollama ignores integrated GPUs by default, so a systemd drop-in sets
+  `OLLAMA_IGPU_ENABLE=1` for `ollama.service`.
+- The GPU shares system RAM, so it speeds things up but doesn't allow bigger
+  models. Only applies if Ollama is installed.
+
 Full details, measurements and known hardware issues are in
 [CHANGES.md](CHANGES.md).
 
@@ -45,7 +54,8 @@ systemctl --user restart wireplumber
 ```
 
 `install.sh` refuses to run on other hardware unless given `--force`. It
-symlinks `home/` into `$HOME` (a real file in the way is moved to
+installs missing packages from `packages.txt` and Ollama's drop-in from
+`system/` (asks for sudo), symlinks `home/` into `$HOME` (a real file in the way is moved to
 `<file>.pre-dotfiles`) and adds one line to `~/.config/hypr/hyprland.lua` that
 loads `~/.config/hypr/extras/*.lua` in name order. This repo's Hyprland settings
 are `extras/60-dell-latitude-7350-detachable.lua`. To uninstall, delete the

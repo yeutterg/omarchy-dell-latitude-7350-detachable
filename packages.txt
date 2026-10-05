@@ -1,0 +1,3 @@
+# Packages install.sh installs with pacman if they're missing.
+# ollama-vulkan: Ollama's Vulkan backend, so models can run on the Intel integrated GPU.
+ollama-vulkan

@@ -56,15 +56,27 @@ enable_units() {
   done
 }
 
-# Report packages from packages.txt that aren't installed (doesn't install them).
-check_packages() {
+# Install packages from packages.txt that aren't installed yet (asks for sudo).
+install_packages() {
   local missing
   [[ -f $repo/packages.txt ]] || return 0
   missing=$(grep -vE '^\s*(#|$)' "$repo/packages.txt" | while read -r pkg; do pacman -Q "$pkg" &>/dev/null || echo "$pkg"; done)
-  if [[ -n $missing ]]; then
-    echo "Missing packages. Install with:"
-    echo "  sudo pacman -S --needed $(echo $missing)"
-  fi
+  [[ -n $missing ]] || return 0
+  echo "Installing $(echo $missing)"
+  sudo pacman -S --needed --noconfirm $missing
+}
+
+# Let Ollama use the integrated GPU (a systemd drop-in for its system service),
+# and restart it if it's running so it picks up the Vulkan backend.
+configure_ollama() {
+  local src=$repo/system/ollama-igpu.conf
+  local dst=/etc/systemd/system/ollama.service.d/igpu.conf
+  pacman -Q ollama &>/dev/null || return 0
+  cmp -s "$src" "$dst" && return 0
+  sudo install -Dm644 "$src" "$dst"
+  sudo systemctl daemon-reload
+  sudo systemctl try-restart ollama
+  echo "Installed $dst"
 }
 
 # Hyprland only loads ~/.config/hypr/extras/*.lua once hyprland.lua asks for it.
@@ -94,7 +106,8 @@ $loader"
 link_tree
 prune_stale_links
 enable_units
-check_packages
+install_packages
+configure_ollama
 ensure_hypr_extras_loader
 
 echo "Done. Run 'hyprctl reload' to apply Hyprland changes; some changes (environment.d, WirePlumber, input method) apply on next login."
