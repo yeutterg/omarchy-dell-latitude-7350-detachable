@@ -1,55 +1,52 @@
 # omarchy-dell-latitude-7350-detachable
 
 [Omarchy](https://omarchy.org) fixes and tweaks for the **Dell Latitude 7350
-Detachable**: working audio, sane side volume buttons, and no window
-transparency artifacts.
+Detachable**.
 
-Generic tablet behaviour (on-screen keyboard, Stay Awake with the cover closed)
-lives in `omarchy-tablet`. Install that too; this repo loads after it.
+**Complementary repo:** generic tablet behaviour (on-screen keyboard, Stay Awake
+with the cover closed) is in [omarchy-tablet](https://github.com/yeutterg/omarchy-tablet). Install
+that too; this repo loads after it.
 
-## What's included
+## Customizations
 
-| Change | What it does |
+| Customization | Summary |
 |---|---|
-| Audio: camera monitor off | Stops WirePlumber stalling on the IPU6 camera nodes, which left the machine with no sound. Cameras aren't exposed through PipeWire. |
-| Audio: internal mic off | Keeps the built-in mic closed so a failed wake after suspend can't jam the sound card. The headset-jack mic still works. |
-| Volume buttons | One step per tap, repeat only when held. The side buttons report their release late, so one tap used to jump several steps. |
-| No transparency | All windows fully opaque; Omarchy's slight transparency showed as light-leak artifacts in Chromium on this panel. |
+| [Audio fixes](#audio-fixes) | Working sound: WirePlumber's camera monitor and the flaky internal mic are disabled |
+| [Volume buttons](#volume-buttons) | One step per tap, repeat only when held |
+| [No transparency](#no-transparency) | All windows fully opaque |
 
-Details, reasons, trade-offs and when each fix can be removed are in
-[CHANGES.md](CHANGES.md), along with known hardware issues.
+### Audio fixes
+- **Camera monitor off:** WirePlumber stalls on the IPU6 camera's raw nodes,
+  leaving the card on the `off` profile with no sound. Cost: cameras aren't
+  exposed through PipeWire (apps opening `/dev/video*` directly still work).
+- **Internal mic off:** after suspend the DMIC can fail to wake, and opening it
+  then jams the card until reboot. The headset-jack mic still works.
+- Both can be removed once the kernel/WirePlumber/camera driver bugs are fixed.
 
-## Requirements
+### Volume buttons
+The side buttons report their release ~470 ms late, so Hyprland's key repeat
+turned one tap into several steps. Now a press steps 5% once and only repeats
+after a 600 ms hold.
 
-- Omarchy (Hyprland, Lua config) on a Dell Latitude 7350 Detachable
-- Recommended: `omarchy-tablet`
+### No transparency
+Omarchy's slight window transparency showed as light-leak artifacts in Chromium
+on this panel, so every window is fully opaque.
+
+Full details, measurements and known hardware issues are in
+[CHANGES.md](CHANGES.md).
 
 ## Install
 
 ```bash
-git clone https://github.com/<you>/omarchy-dell-latitude-7350-detachable ~/dotfiles/omarchy-dell-latitude-7350-detachable
+git clone https://github.com/yeutterg/omarchy-dell-latitude-7350-detachable ~/dotfiles/omarchy-dell-latitude-7350-detachable
 ~/dotfiles/omarchy-dell-latitude-7350-detachable/install.sh
 hyprctl reload
 systemctl --user restart wireplumber
 ```
 
 `install.sh` refuses to run on other hardware unless given `--force`. It
-symlinks everything under `home/` into `$HOME`, so editing a file in `~/.config`
-edits the repo. A real file already in the way is moved aside to
-`<file>.pre-dotfiles`. It also adds one line to `~/.config/hypr/hyprland.lua`
-that loads `~/.config/hypr/extras/*.lua` in name order. This repo's Hyprland
-settings are `extras/60-dell-latitude-7350-detachable.lua`, after `omarchy-tablet`'s
-`50-tablet.lua`.
-
-To uninstall, delete the symlinks that point into this repo, and rename any
-`*.pre-dotfiles` files back.
-
-## Layout
-
-```
-home/                 mirrored into $HOME as symlinks
-  .config/hypr/extras/60-dell-latitude-7350-detachable.lua   Hyprland: volume keys, opacity
-  .config/wireplumber/wireplumber.conf.d/                audio fixes
-install.sh            creates the links
-CHANGES.md            every change from Omarchy's defaults, with reasons
-```
+symlinks `home/` into `$HOME` (a real file in the way is moved to
+`<file>.pre-dotfiles`) and adds one line to `~/.config/hypr/hyprland.lua` that
+loads `~/.config/hypr/extras/*.lua` in name order. This repo's Hyprland settings
+are `extras/60-dell-latitude-7350-detachable.lua`. To uninstall, delete the
+symlinks into this repo and restore any `*.pre-dotfiles` files.
