@@ -1,4 +1,4 @@
-# omarchy-dell-latitude-7350-detachable
+# Omarchy Dotfiles for Dell 7350 Detachable
 
 [Omarchy](https://omarchy.org) fixes and tweaks for the **Dell Latitude 7350
 Detachable**.
