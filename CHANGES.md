@@ -16,7 +16,7 @@ Detachable only. Git history has the exact diffs.
 - **Remove when:** WirePlumber or `intel-ipu7-camera` fixes the stall.
 
 ### Volume keys: one step per tap, hold to repeat — 2026-10-05
-- **File:** `home/.config/hypr/extras/60-latitude-7350-detachable.lua`
+- **File:** `home/.config/hypr/extras/60-dell-latitude-7350-detachable.lua`
 - **Change:** Replaces Omarchy's `XF86AudioRaiseVolume`/`XF86AudioLowerVolume`
   bindings (Hyprland key repeat, `repeating = true`). A press steps the volume
   once (5%); after a 600 ms hold it repeats every 100 ms until release. Done with
@@ -46,7 +46,7 @@ Detachable only. Git history has the exact diffs.
 - **Remove when:** A kernel update fixes the DMIC resume.
 
 ### No window transparency — 2026-10-05
-- **File:** `home/.config/hypr/extras/60-latitude-7350-detachable.lua`
+- **File:** `home/.config/hypr/extras/60-dell-latitude-7350-detachable.lua`
 - **Change:** `o.window(".*", { opacity = "1 1" })`, loaded after Omarchy's
   rules (Omarchy default: `0.985 0.96`; browsers `1.0 0.985`).
 - **Why:** Chromium showed light-leak/faded-polarizer-like artifacts that

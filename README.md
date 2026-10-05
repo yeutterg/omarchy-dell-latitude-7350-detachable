@@ -1,4 +1,4 @@
-# omarchy-latitude-7350-detachable
+# omarchy-dell-latitude-7350-detachable
 
 [Omarchy](https://omarchy.org) fixes and tweaks for the **Dell Latitude 7350
 Detachable**: working audio, sane side volume buttons, and no window
@@ -27,8 +27,8 @@ Details, reasons, trade-offs and when each fix can be removed are in
 ## Install
 
 ```bash
-git clone https://github.com/<you>/omarchy-latitude-7350-detachable ~/dotfiles/omarchy-latitude-7350-detachable
-~/dotfiles/omarchy-latitude-7350-detachable/install.sh
+git clone https://github.com/<you>/omarchy-dell-latitude-7350-detachable ~/dotfiles/omarchy-dell-latitude-7350-detachable
+~/dotfiles/omarchy-dell-latitude-7350-detachable/install.sh
 hyprctl reload
 systemctl --user restart wireplumber
 ```
@@ -38,7 +38,7 @@ symlinks everything under `home/` into `$HOME`, so editing a file in `~/.config`
 edits the repo. A real file already in the way is moved aside to
 `<file>.pre-dotfiles`. It also adds one line to `~/.config/hypr/hyprland.lua`
 that loads `~/.config/hypr/extras/*.lua` in name order. This repo's Hyprland
-settings are `extras/60-latitude-7350-detachable.lua`, after `omarchy-tablet`'s
+settings are `extras/60-dell-latitude-7350-detachable.lua`, after `omarchy-tablet`'s
 `50-tablet.lua`.
 
 To uninstall, delete the symlinks that point into this repo, and rename any
@@ -48,7 +48,7 @@ To uninstall, delete the symlinks that point into this repo, and rename any
 
 ```
 home/                 mirrored into $HOME as symlinks
-  .config/hypr/extras/60-latitude-7350-detachable.lua   Hyprland: volume keys, opacity
+  .config/hypr/extras/60-dell-latitude-7350-detachable.lua   Hyprland: volume keys, opacity
   .config/wireplumber/wireplumber.conf.d/                audio fixes
 install.sh            creates the links
 CHANGES.md            every change from Omarchy's defaults, with reasons

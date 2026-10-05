@@ -1,4 +1,4 @@
--- omarchy-latitude-7350-detachable: Hyprland settings for the Dell Latitude 7350
+-- omarchy-dell-latitude-7350-detachable: Hyprland settings for the Dell Latitude 7350
 -- Detachable only. Linked into ~/.config/hypr/extras/ by install.sh; loads after
 -- omarchy-tablet's 50-tablet.lua, so it can override it.
 
