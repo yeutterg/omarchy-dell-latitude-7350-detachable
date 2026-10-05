@@ -13,6 +13,7 @@ that too; this repo loads after it.
 |---|---|
 | [Audio fixes](#audio-fixes) | Working sound: WirePlumber's camera monitor and the flaky internal mic are disabled |
 | [Volume buttons](#volume-buttons) | One step per tap, repeat only when held |
+| [Display scale](#display-scale) | Built-in panel at 2x |
 | [Ollama on the GPU](#ollama-on-the-gpu) | Vulkan backend and integrated-GPU support for Ollama |
 
 ### Audio fixes
@@ -27,6 +28,10 @@ that too; this repo loads after it.
 The side buttons report their release ~470 ms late, so Hyprland's key repeat
 turned one tap into several steps. Now a press steps 5% once and only repeats
 after a 600 ms hold.
+
+### Display scale
+The built-in 2880x1920 panel is set to exactly 2x (1440x960 of space) instead
+of Omarchy's `auto`. Other monitors keep Omarchy's setting.
 
 ### Ollama on the GPU
 - Installs `ollama-vulkan`, Ollama's Vulkan backend, which runs on the Meteor

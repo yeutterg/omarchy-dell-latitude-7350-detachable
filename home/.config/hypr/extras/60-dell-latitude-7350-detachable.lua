@@ -39,3 +39,7 @@ o.bind("XF86AudioRaiseVolume", "Volume up", volume_press("raise"), { locked = tr
 o.bind("XF86AudioLowerVolume", "Volume down", volume_press("lower"), { locked = true })
 o.bind("XF86AudioRaiseVolume", nil, volume_release, { locked = true, release = true })
 o.bind("XF86AudioLowerVolume", nil, volume_release, { locked = true, release = true })
+
+-- Built-in 2880x1920 panel pinned to exactly 2x instead of Omarchy's "auto",
+-- so it doesn't depend on Hyprland's guess; an integer scale keeps text crisp.
+hl.monitor({ output = "eDP-1", mode = "preferred", position = "auto", scale = 2 })

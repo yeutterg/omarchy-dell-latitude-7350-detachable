@@ -3,6 +3,14 @@
 Every intentional deviation from what Omarchy ships, for the Dell Latitude 7350
 Detachable only. Git history has the exact diffs.
 
+### Built-in display at 2x — 2026-10-05
+- **File:** `home/.config/hypr/extras/60-dell-latitude-7350-detachable.lua`
+- **Change:** `hl.monitor` for `eDP-1` with `scale = 2` (Omarchy default:
+  `"auto"` for every monitor). Previously set by editing `~/.config/hypr/monitors.lua`,
+  which is back to Omarchy's template.
+- **Why:** Set by hand before this repo existed; an integer scale suits the
+  2880x1920 panel. Only the built-in panel is affected.
+
 ### Ollama on the integrated GPU — 2026-10-05
 - **Files:** `packages.txt`, `system/ollama-igpu.conf` (installed to
   `/etc/systemd/system/ollama.service.d/igpu.conf`), `install.sh`.
