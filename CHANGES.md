@@ -5,11 +5,21 @@ Detachable only. Git history has the exact diffs.
 
 ### Lower hardware brightness minimum — 2026-10-10
 - **File:** `home/.config/hypr/extras/60-dell-latitude-7350-detachable.lua`.
-- **Change:** Brightness down takes a final step from raw level 5 (1%) to
-  raw level 1; Shift + brightness down goes directly to level 1.
+- **Change:** Regular brightness buttons move one hardware level at a time
+  below 1% (0.81%, 0.60%, 0.40%, 0.20%). Shift + brightness down goes
+  directly to level 1. `home/.local/bin/dell-brightness` shows the measured
+  percentage and uses raw brightness/max values for the OSD progress bar.
+  The cloned `greg.monitor` panel preserves fractional values and reads them
+  through `dell-monitor-state`. External displays use the stock command.
+  Hardware-only changes were hard to distinguish visually. Below 1%,
+  hyprsunset additionally scales the image to 80/60/40/20% for raw levels
+  4/3/2/1; it returns to 100% at raw level 5. A user comparison confirmed
+  software dimming is visibly darker. Readouts remain backlight percentages.
 - **Why:** The Intel backlight exposes 496 levels, while Omarchy's normal
   brightness-down binding stops at 1%, rounded to level 5.
-- **Validation:** Applied level 1; Hyprland reload succeeded with no config errors.
+- **Validation:** Stepped through all four sub-1% levels in both directions;
+  the monitor state reported 0.20 at minimum, and Hyprland reload had no errors.
+  Verified gamma follows 80/60/40/20% down and restores to 100% on the way up.
 
 ### Built-in display at 2x — 2026-10-05
 - **File:** `home/.config/hypr/extras/60-dell-latitude-7350-detachable.lua`

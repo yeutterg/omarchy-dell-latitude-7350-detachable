@@ -1,0 +1,68 @@
+#!/bin/bash
+set -euo pipefail
+no_osd=0
+monitor=""
+while (( $# )); do
+  case "$1" in
+    --no-osd) no_osd=1; shift ;;
+    --monitor) monitor=$2; shift 2 ;;
+    *) break ;;
+  esac
+done
+[[ -n $monitor ]] || monitor=$(omarchy-hyprland-monitor-focused 2>/dev/null || true)
+if [[ $monitor != eDP-* ]]; then
+  if (( $# )) && pgrep -x hyprsunset >/dev/null; then
+    hyprctl hyprsunset gamma 100 >/dev/null 2>&1 || true
+  fi
+  args=(--monitor "$monitor")
+  (( no_osd )) && args+=(--no-osd)
+  exec /usr/share/omarchy/bin/omarchy-brightness-display "${args[@]}" "$@"
+fi
+device=intel_backlight
+current=$(brightnessctl -d "$device" get)
+maximum=$(brightnessctl -d "$device" max)
+percentage() {
+  awk -v n="$1" -v m="$maximum" 'BEGIN { p=n*100/m; if(p<1) printf "%.2f",p; else printf "%.0f",p }'
+}
+if (( $# == 0 )); then percentage "$current"; echo; exit; fi
+exec {lock_fd}>"${XDG_RUNTIME_DIR:-/tmp}/dell-brightness.lock"
+flock -n "$lock_fd" || exit 0
+current=$(brightnessctl -d "$device" get)
+case "$1" in
+  sync) : ;;
+  down|up)
+    boundary=$(( (maximum + 50) / 100 ))
+    if [[ $1 == down && $current -le $boundary ]]; then
+      target=$((current-1)); (( target < 1 )) && target=1
+      brightnessctl -q -d "$device" set "$target"
+    elif [[ $1 == up && $current -lt $boundary ]]; then
+      brightnessctl -q -d "$device" set "$((current+1))"
+    else
+      step=5%-; [[ $1 == up ]] && step=+5%
+      /usr/share/omarchy/bin/omarchy-brightness-display --no-osd --monitor "$monitor" "$step"
+    fi ;;
+  minimum) brightnessctl -q -d "$device" set 1 ;;
+  *%) brightnessctl -q -d "$device" set "$1" ;;
+  *) exec /usr/share/omarchy/bin/omarchy-brightness-display --monitor "$monitor" "$@" ;;
+esac
+current=$(brightnessctl -d "$device" get)
+boundary=$(( (maximum + 50) / 100 ))
+# The panel barely changes at these backlight levels. Scale the image as well
+# so each sub-1% step is visibly darker. Percentages still describe backlight.
+gamma=100
+if (( current < boundary )); then
+  gamma=$((current * 100 / boundary))
+  if ! pgrep -x hyprsunset >/dev/null; then
+    setsid hyprsunset --identity >"${XDG_RUNTIME_DIR:-/tmp}/dell-hyprsunset.log" 2>&1 </dev/null &
+  fi
+  for attempt in {1..10}; do
+    hyprctl hyprsunset gamma "$gamma" >/dev/null 2>&1 && break
+    sleep 0.1
+  done
+elif pgrep -x hyprsunset >/dev/null; then
+  hyprctl hyprsunset gamma 100 >/dev/null 2>&1 || true
+fi
+if (( ! no_osd )); then
+  payload=$(jq -cn --argjson value "$current" --argjson max "$maximum" --arg text "$(percentage "$current")%" '{icon:"brightness",value:$value,max:$max,progressText:$text}')
+  omarchy-shell -q osd show "$payload"
+fi

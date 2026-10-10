@@ -44,17 +44,11 @@ o.bind("XF86AudioLowerVolume", nil, volume_release, { locked = true, release = t
 -- so it doesn't depend on Hyprland's guess; an integer scale keeps text crisp.
 hl.monitor({ output = "eDP-1", mode = "preferred", position = "auto", scale = 2 })
 
--- Omarchy stops at 1% (5/496). Allow the final down step to reach raw level 1.
-hl.unbind("XF86MonBrightnessDown")
-hl.unbind("SHIFT + XF86MonBrightnessDown")
-o.bind("XF86MonBrightnessDown", "Brightness down", function()
-  local file = io.open("/sys/class/backlight/intel_backlight/brightness", "r")
-  local current = file and tonumber(file:read("*a"))
-  if file then file:close() end
-  if current and current <= 5 then
-    hl.exec_cmd("brightnessctl -d intel_backlight set 1")
-  else
-    hl.exec_cmd("omarchy-brightness-display 5%-")
-  end
-end, { locked = true, repeating = true })
-o.bind("SHIFT + XF86MonBrightnessDown", "Brightness minimum", "brightnessctl -d intel_backlight set 1", { locked = true })
+-- Fractional hardware steps below 1%, with accurate OSD readout.
+for _, key in ipairs({ "XF86MonBrightnessDown", "XF86MonBrightnessUp", "SHIFT + XF86MonBrightnessDown" }) do
+  hl.unbind(key)
+end
+o.bind("XF86MonBrightnessDown", "Brightness down", "$HOME/.local/bin/dell-brightness down", { locked = true, repeating = true })
+o.bind("XF86MonBrightnessUp", "Brightness up", "$HOME/.local/bin/dell-brightness up", { locked = true, repeating = true })
+o.bind("SHIFT + XF86MonBrightnessDown", "Brightness minimum", "$HOME/.local/bin/dell-brightness minimum", { locked = true })
+o.exec_on_start("$HOME/.local/bin/dell-brightness --no-osd --monitor eDP-1 sync")

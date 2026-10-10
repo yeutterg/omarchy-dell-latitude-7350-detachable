@@ -1,0 +1,8 @@
+#!/bin/bash
+set -euo pipefail
+mapfile -t state < <(omarchy-monitor-state)
+[[ ${#state[@]} -ge 6 ]] || exit 1
+if [[ ${state[5]} == eDP-* ]]; then
+  state[0]=$("$HOME/.local/bin/dell-brightness" --monitor "${state[5]}")
+fi
+printf '%s\n' "${state[@]}"

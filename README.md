@@ -14,6 +14,7 @@ that too; this repo loads after it.
 | [Audio fixes](#audio-fixes) | Working sound: WirePlumber's camera monitor and the flaky internal mic are disabled |
 | [Volume buttons](#volume-buttons) | One step per tap, repeat only when held |
 | [Display scale](#display-scale) | Built-in panel at 2x |
+| [Low brightness](#low-brightness) | Hardware steps below 1%, with fractional percentage readouts |
 | [Ollama on the GPU](#ollama-on-the-gpu) | Vulkan backend and integrated-GPU support for Ollama |
 
 ### Audio fixes
@@ -32,6 +33,18 @@ after a 600 ms hold.
 ### Display scale
 The built-in 2880x1920 panel is set to exactly 2x (1440x960 of space) instead
 of Omarchy's `auto`. Other monitors keep Omarchy's setting.
+
+### Low brightness
+
+The regular brightness buttons step through 0.81%, 0.60%, 0.40% and 0.20%
+below 1%. Because the hardware difference is subtle, hyprsunset also dims
+the image at those levels (80%, 60%, 40%, 20% image brightness respectively).
+These readouts are backlight control percentages, not measured luminance.
+The OSD and custom display panel show two decimal places below 1%.
+Normal image brightness returns at 1% and above.
+
+On a fresh installation, run `omarchy plugin clone omarchy.monitor` before
+`install.sh` to activate the `greg.monitor` display panel.
 
 ### Ollama on the GPU
 - Installs `ollama-vulkan`, Ollama's Vulkan backend, which runs on the Meteor
