@@ -77,10 +77,13 @@ Detachable only. Git history has the exact diffs.
 
 - **Infrared camera investigation** — 2026-10-10. Firmware exposes
   `OVTI00AB:00` behind the USBIO I2C bridge, in addition to `OVTI08F4`
-  and `OVTI8856`. No driver is bound to `OVTI00AB`, and the installed
-  kernel has no `og0va1b` module. Only the RGB ov08x40 sensor appears
+  and `OVTI8856`. No driver is bound to `OVTI00AB`. The installed
+  `og0ve1b` module advertises only the OG0VE1B device-tree match,
+  with no OG0VA1B/OVTI00AB ACPI support. Only the RGB ov08x40 sensor appears
   in the media topology. This does not establish absence of Windows Hello
   hardware; infrared capture and emitter operation still need verification.
+  The [upstream ACPI discussion](https://lists.openwall.net/linux-kernel/2026/07/28/1593)
+  identifies OVTI00AB as OG0VA1B and describes experimental IPU6 integration.
 
 - **Internal mic (RT1713, SoundWire link 3) can lock up** — 2026-10-04. Opening
   the internal mic failed in the kernel (`rt712-sdca-dmic … ASoC error (-61)`),
