@@ -94,6 +94,11 @@ Detachable only. Git history has the exact diffs.
   hardware; infrared capture and emitter operation still need verification.
   The [upstream ACPI discussion](https://lists.openwall.net/linux-kernel/2026/07/28/1593)
   identifies OVTI00AB as OG0VA1B and describes experimental IPU6 integration.
+  Subsequently installed the experimental OG0VA1B sensor and patched IPU
+  bridge via `dell-ir-camera/0.1` DKMS and rebuilt the Limine UKI.
+  The live sensor driver deferred waiting for its graph endpoint. Capture
+  remains unverified until reboot; source and rollback instructions are in
+  `system/dell-ir-camera/README.md`. No PAM changes have been made.
 
 - **Internal mic (RT1713, SoundWire link 3) can lock up** — 2026-10-04. Opening
   the internal mic failed in the kernel (`rt712-sdca-dmic … ASoC error (-61)`),
