@@ -3,6 +3,14 @@
 Every intentional deviation from what Omarchy ships, for the Dell Latitude 7350
 Detachable only. Git history has the exact diffs.
 
+### Lower hardware brightness minimum — 2026-10-10
+- **File:** `home/.config/hypr/extras/60-dell-latitude-7350-detachable.lua`.
+- **Change:** Brightness down takes a final step from raw level 5 (1%) to
+  raw level 1; Shift + brightness down goes directly to level 1.
+- **Why:** The Intel backlight exposes 496 levels, while Omarchy's normal
+  brightness-down binding stops at 1%, rounded to level 5.
+- **Validation:** Applied level 1; Hyprland reload succeeded with no config errors.
+
 ### Built-in display at 2x — 2026-10-05
 - **File:** `home/.config/hypr/extras/60-dell-latitude-7350-detachable.lua`
 - **Change:** `hl.monitor` for `eDP-1` with `scale = 2` (Omarchy default:
@@ -66,6 +74,13 @@ Detachable only. Git history has the exact diffs.
 - **Remove when:** A kernel update fixes the DMIC resume.
 
 ## Known issues (not config changes)
+
+- **Infrared camera investigation** — 2026-10-10. Firmware exposes
+  `OVTI00AB:00` behind the USBIO I2C bridge, in addition to `OVTI08F4`
+  and `OVTI8856`. No driver is bound to `OVTI00AB`, and the installed
+  kernel has no `og0va1b` module. Only the RGB ov08x40 sensor appears
+  in the media topology. This does not establish absence of Windows Hello
+  hardware; infrared capture and emitter operation still need verification.
 
 - **Internal mic (RT1713, SoundWire link 3) can lock up** — 2026-10-04. Opening
   the internal mic failed in the kernel (`rt712-sdca-dmic … ASoC error (-61)`),
