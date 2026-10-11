@@ -42,6 +42,7 @@
 
 /* Analogue gain controls from sensor */
 #define OG0V_REG_ANALOGUE_GAIN		CCI_REG16(0x350a)
+#define OG0VA1B_REG_ANALOGUE_GAIN		CCI_REG16(0x3508)
 #define OG0V_ANALOGUE_GAIN_MIN		1
 #define OG0V_ANALOGUE_GAIN_MAX		0x1ff
 #define OG0V_ANALOGUE_GAIN_STEP		1
@@ -97,6 +98,9 @@ struct og0ve1b_sensor_data {
 	int num_modes;
 	/* Exposure register unit: OG0VE1B 1/16 line (4), OG0VA1B whole lines (0). */
 	unsigned int exposure_shift;
+	u32 analogue_gain_reg;
+	unsigned int analogue_gain_shift;
+	unsigned int analogue_gain_min;
 	/* Pixel rate multiplier: OG0VA1B uses CSI-2 DDR (2), OG0VE1B keeps 1. */
 	unsigned int pixel_rate_mul;
 	bool cache_test_pattern_reg;
@@ -524,6 +528,9 @@ static const struct og0ve1b_sensor_data og0va1b_data = {
 	.test_pattern_menu = og0va1b_test_pattern_menu,
 	.num_test_patterns = ARRAY_SIZE(og0va1b_test_pattern_menu),
 	.exposure_shift = 0,
+	.analogue_gain_reg = OG0VA1B_REG_ANALOGUE_GAIN,
+	.analogue_gain_shift = 4,
+	.analogue_gain_min = 16,
 	.pixel_rate_mul = 2,
 	.link_freq_menu = og0va1b_link_freq_menu,
 	.num_link_freqs = ARRAY_SIZE(og0va1b_link_freq_menu),
@@ -540,6 +547,8 @@ static const struct og0ve1b_sensor_data og0ve1b_data = {
 	.num_test_patterns = ARRAY_SIZE(og0ve1b_test_pattern_menu),
 	.cache_test_pattern_reg = true,
 	.exposure_shift = 4,
+	.analogue_gain_reg = OG0V_REG_ANALOGUE_GAIN,
+	.analogue_gain_min = OG0V_ANALOGUE_GAIN_MIN,
 	.pixel_rate_mul = 1,
 	.link_freq_menu = og0ve1b_link_freq_menu,
 	.num_link_freqs = ARRAY_SIZE(og0ve1b_link_freq_menu),
@@ -576,8 +585,8 @@ static int og0ve1b_set_ctrl(struct v4l2_ctrl *ctrl)
 
 	switch (ctrl->id) {
 	case V4L2_CID_ANALOGUE_GAIN:
-		ret = cci_write(og0ve1b->regmap, OG0V_REG_ANALOGUE_GAIN,
-				ctrl->val, NULL);
+		ret = cci_write(og0ve1b->regmap, og0ve1b->data->analogue_gain_reg,
+				ctrl->val << og0ve1b->data->analogue_gain_shift, NULL);
 		break;
 	case V4L2_CID_EXPOSURE:
 		ret = cci_write(og0ve1b->regmap, OG0V_REG_EXPOSURE,
@@ -649,7 +658,7 @@ static int og0ve1b_init_controls(struct og0ve1b *og0ve1b)
 					    v_blank);
 
 	v4l2_ctrl_new_std(ctrl_hdlr, &og0ve1b_ctrl_ops, V4L2_CID_ANALOGUE_GAIN,
-			  OG0V_ANALOGUE_GAIN_MIN, OG0V_ANALOGUE_GAIN_MAX,
+			  og0ve1b->data->analogue_gain_min, OG0V_ANALOGUE_GAIN_MAX,
 			  OG0V_ANALOGUE_GAIN_STEP,
 			  OG0V_ANALOGUE_GAIN_DEFAULT);
 

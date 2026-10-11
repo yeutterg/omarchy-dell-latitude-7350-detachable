@@ -1,0 +1,26 @@
+[
+  {
+    "file": "yunet-2026.onnx",
+    "url": "https://media.githubusercontent.com/media/opencv/opencv_zoo/main/models/face_detection_yunet/face_detection_yunet_2026may.onnx",
+    "sha256": "ebafce4e3c118d6554634be5c27ab333b4c047a9a8c3faf1d7cf93101c22f0f0",
+    "decompress_bzip2": false
+  },
+  {
+    "file": "sface.onnx",
+    "url": "https://media.githubusercontent.com/media/opencv/opencv_zoo/main/models/face_recognition_sface/face_recognition_sface_2021dec.onnx",
+    "sha256": "0ba9fbfa01b5270c96627c4ef784da859931e02f04419c829e83484087c34e79",
+    "decompress_bzip2": false
+  },
+  {
+    "file": "mmod_human_face_detector.dat",
+    "url": "https://raw.githubusercontent.com/davisking/dlib-models/master/mmod_human_face_detector.dat.bz2",
+    "sha256": "be467b1a76f482693de3b0f6a1ff91d092319be71523d4d4b0628f6a53fcb87a",
+    "decompress_bzip2": true
+  },
+  {
+    "file": "res10.caffemodel",
+    "url": "https://raw.githubusercontent.com/opencv/opencv_3rdparty/dnn_samples_face_detector_20180205_fp16/res10_300x300_ssd_iter_140000_fp16.caffemodel",
+    "sha256": "510ffd2471bd81e3fcc88a5beb4eae4fb445ccf8333ebc54e7302b83f4158a76",
+    "decompress_bzip2": false
+  }
+]

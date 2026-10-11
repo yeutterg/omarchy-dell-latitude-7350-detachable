@@ -1,0 +1,4 @@
+# Runtime versions validated in the isolated development environment.
+numpy==2.5.3
+opencv-python-headless==5.0.0.93
+dlib==20.0.1

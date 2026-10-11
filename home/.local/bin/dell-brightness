@@ -53,7 +53,7 @@ gamma=100
 if (( current < boundary )); then
   gamma=$((current * 100 / boundary))
   if ! pgrep -x hyprsunset >/dev/null; then
-    setsid hyprsunset --identity >"${XDG_RUNTIME_DIR:-/tmp}/dell-hyprsunset.log" 2>&1 </dev/null &
+    setsid hyprsunset --identity >"${XDG_RUNTIME_DIR:-/tmp}/dell-hyprsunset.log" 2>&1 </dev/null {lock_fd}>&- &
   fi
   for attempt in {1..10}; do
     hyprctl hyprsunset gamma "$gamma" >/dev/null 2>&1 && break

@@ -1,0 +1,4 @@
+#%PAM-1.0
+# Separate face-only flow; the existing password service remains available.
+auth required /usr/local/lib/security/pam_dell_howdy.so
+account include system-local-login

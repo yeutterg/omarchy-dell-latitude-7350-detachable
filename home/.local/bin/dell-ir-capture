@@ -1,0 +1,93 @@
+#!/usr/bin/env python3
+"""Diagnostic IR capture with center-weighted exposure; no flash/PAM changes."""
+from array import array
+import os
+from pathlib import Path
+import signal
+import subprocess
+import sys
+import tempfile
+
+WIDTH, HEIGHT, BLACK = 640, 480, 64
+TARGET = 256
+
+def control(device, **values):
+    subprocess.run(['v4l2-ctl', '-d', device, '--set-ctrl',
+                    ','.join(f'{key}={value}' for key, value in values.items())], check=True)
+
+def percentile(values, fraction):
+    return values[min(len(values)-1, int(len(values)*fraction))]
+
+def interrupt(_signum, _frame):
+    raise KeyboardInterrupt
+
+signal.signal(signal.SIGTERM, interrupt)
+output = Path(sys.argv[1] if len(sys.argv) > 1 else
+              os.environ.get('XDG_RUNTIME_DIR', '/tmp') + '/dell-ir-preview.pgm')
+names = sorted(Path('/sys/class/video4linux').glob('v4l-subdev*/name'))
+subdev = next(('/dev/' + p.parent.name for p in names
+               if p.read_text().startswith('og0va1b')), None)
+if not subdev:
+    raise SystemExit('OG0VA1B sensor is not bound.')
+original = subprocess.check_output(['v4l2-ctl', '-d', subdev, '--get-ctrl',
+                                   'exposure,analogue_gain,vertical_blanking'], text=True)
+original = {k: int(v) for k, v in (line.split(':') for line in original.splitlines())}
+manual = 'DELL_IR_GAIN' in os.environ or 'DELL_IR_EXPOSURE' in os.environ
+gain = int(os.environ.get('DELL_IR_GAIN', 128))
+exposure = int(os.environ.get('DELL_IR_EXPOSURE', 2000))
+if not 16 <= gain <= 511 or not 1 <= exposure <= 16000:
+    raise SystemExit('Gain must be 16..511 and exposure 1..16000 lines.')
+try:
+    with tempfile.TemporaryDirectory(prefix='dell-ir.',
+                                     dir=os.environ.get('XDG_RUNTIME_DIR', '/tmp')) as work:
+        for attempt in range(1 if manual else 8):
+            # Sensor frame length must include the exposure and its 14-line margin.
+            blanking = max(1616, exposure + 14 - HEIGHT)
+            control(subdev, vertical_blanking=blanking)
+            control(subdev, exposure=exposure, analogue_gain=gain)
+            result = subprocess.run(['cam', '-c', r'\_SB_.PC00.LNK0', '--stream',
+                'role=raw,width=640,height=480,pixelformat=R10', '--strict-formats',
+                '--capture=10', '--file=' + work + '/frame-#.bin'],
+                env={**os.environ, 'LIBCAMERA_LOG_LEVELS': '*:FATAL'},
+                capture_output=True, text=True, timeout=10)
+            if result.returncode:
+                raise RuntimeError(result.stdout + result.stderr)
+            frame = sorted(Path(work).glob('frame-*.bin'))[-1]
+            pixels = array('H')
+            pixels.frombytes(frame.read_bytes())
+            if sys.byteorder != 'little':
+                pixels.byteswap()
+            if len(pixels) != WIDTH * HEIGHT:
+                raise RuntimeError('Unexpected raw frame size')
+            # Central region avoids the window at the edge of the test scene.
+            region = sorted(pixels[y*WIDTH+x] for y in range(96, 384, 2)
+                            for x in range(192, 448, 2))
+            level = percentile(region, .80)
+            clipped = sum(p >= 1000 for p in region) / len(region)
+            print(f'AE {attempt+1}: exposure={exposure}, gain={gain}, '
+                  f'center p80={level}, clipped={clipped:.1%}', flush=True)
+            if manual or (218 <= level <= 294 and clipped < .02):
+                break
+            ratio = min(4, max(.25, (TARGET-BLACK)/max(level-BLACK, 1)))
+            if clipped >= .02:
+                ratio = min(ratio, .5)
+            product = max(1, min(12000*511, exposure*gain*ratio))
+            # Favor longer exposure over gain noise, with an ~100 ms ceiling.
+            next_exposure = max(1, min(12000, round(product / 128)))
+            next_gain = max(1, min(511, round(product / next_exposure)))
+            if (next_exposure, next_gain) == (exposure, gain):
+                print('Exposure limit reached; more light is needed.', flush=True)
+                break
+            if attempt < 7:
+                exposure, gain = next_exposure, next_gain
+        # Metered region also drives preview levels; saturated background may clip.
+        low = max(BLACK, percentile(region, .01))
+        high = max(low+16, percentile(region, .99))
+        image = bytes(max(0, min(255, (p-low)*255//(high-low))) for p in pixels)
+        output.write_bytes(b'P5\n640 480\n255\n' + image)
+        print(f'{output}: raw range {min(pixels)}..{max(pixels)}; preview {low}..{high}')
+        print('Preview contrast is normalized; active IR illumination is unverified.')
+finally:
+    # Restore exposure before shrinking the permitted frame length.
+    control(subdev, exposure=original['exposure'], analogue_gain=original['analogue_gain'])
+    control(subdev, vertical_blanking=original['vertical_blanking'])

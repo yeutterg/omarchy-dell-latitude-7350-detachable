@@ -20,6 +20,11 @@ Detachable only. Git history has the exact diffs.
 - **Validation:** Stepped through all four sub-1% levels in both directions;
   the monitor state reported 0.20 at minimum, and Hyprland reload had no errors.
   Verified gamma follows 80/60/40/20% down and restores to 100% on the way up.
+  **2026-10-10 reboot fix:** Close the brightness lock descriptor when starting
+  hyprsunset. Otherwise that long-lived child holds the lock after autostart
+  and all later button presses are silently dropped. Reproduced by finding
+  hyprsunset holding `/run/user/1000/dell-brightness.lock`; verified the fixed
+  startup and compositor-launched up/down commands release it.
 
 ### Built-in display at 2x — 2026-10-05
 - **File:** `home/.config/hypr/extras/60-dell-latitude-7350-detachable.lua`
@@ -83,22 +88,36 @@ Detachable only. Git history has the exact diffs.
 - **Status:** Not yet confirmed across a suspend/resume.
 - **Remove when:** A kernel update fixes the DMIC resume.
 
+### Speaker audio recovery — 2026-10-11
+- **Observed:** Audio was silent after keyboard detachment. The card remained
+  present with no new codec errors, but used the Pro Audio profile with the
+  empty headphone-jack output selected and the hardware speaker switch off.
+- **Recovery:** Restored the `HiFi` profile, selected its Speaker sink, and
+  cleared mute. WirePlumber saved the profile and default speaker selection.
+- **Validation:** Playback completed without driver errors; the user confirmed
+  hearing the test tone. Keyboard detachment as the cause is not established.
+
 ## Known issues (not config changes)
 
 - **Infrared camera investigation** — 2026-10-10. Firmware exposes
   `OVTI00AB:00` behind the USBIO I2C bridge, in addition to `OVTI08F4`
-  and `OVTI8856`. No driver is bound to `OVTI00AB`. The installed
-  `og0ve1b` module advertises only the OG0VE1B device-tree match,
-  with no OG0VA1B/OVTI00AB ACPI support. Only the RGB ov08x40 sensor appears
-  in the media topology. This does not establish absence of Windows Hello
-  hardware; infrared capture and emitter operation still need verification.
+  and `OVTI8856`. The packaged kernel originally had no ACPI match for this
+  sensor. The experimental driver now binds it, and libcamera streams
+  640x480 monochrome R10 images. A face-positioned capture confirms the front
+  camera. The IR emitter still needs verification.
   The [upstream ACPI discussion](https://lists.openwall.net/linux-kernel/2026/07/28/1593)
   identifies OVTI00AB as OG0VA1B and describes experimental IPU6 integration.
   Subsequently installed the experimental OG0VA1B sensor and patched IPU
   bridge via `dell-ir-camera/0.1` DKMS and rebuilt the Limine UKI.
-  The live sensor driver deferred waiting for its graph endpoint. Capture
-  remains unverified until reboot; source and rollback instructions are in
-  `system/dell-ir-camera/README.md`. No PAM changes have been made.
+  Reboot resolved the initial deferred graph endpoint. Found and corrected a
+  gain-register mismatch in the imported driver: OG0VA1B needs `0x3508` with
+  a four-bit shift, rather than the OG0VE1B layout. Version 0.2 is installed and
+  live-loaded. Automatic exposure now converges to its target in two steps
+  (4129 lines, gain 128); active illumination remains unverified. Continuous automatic
+  exposure is tested and the root-owned recognition runtime is installed.
+  A PIN-preserving face lock plugin is prepared. Recognition enrollment and PAM/lock activation remain
+  incomplete. Source and rollback details are in `system/dell-ir-camera/`
+  and `system/dell-face-auth/`. No PAM changes have been made.
 
 - **Internal mic (RT1713, SoundWire link 3) can lock up** — 2026-10-04. Opening
   the internal mic failed in the kernel (`rt712-sdca-dmic … ASoC error (-61)`),

@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "id": "dell.lock",
+  "name": "Dell Face and Tablet Lock",
+  "version": "1.0.0",
+  "author": "greg",
+  "description": "Tablet PIN/password lock with a separate IR face authentication flow.",
+  "omarchy": {
+    "capabilities": [
+      "authentication"
+    ],
+    "clonedFrom": "tablet.lock"
+  },
+  "kinds": [
+    "service"
+  ],
+  "keepLoaded": true,
+  "entryPoints": {
+    "service": "Service.qml"
+  }
+}
