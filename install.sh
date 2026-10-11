@@ -91,7 +91,10 @@ configure_easyeffects() {
   pacman -Q easyeffects &>/dev/null || return 0
   mkdir -p "$data/output" "$data/autoload/output" "${rc%/*}"
   if [[ ! -f $preset ]]; then
-    curl -fsSL "$url" -o "$preset.tmp" && mv "$preset.tmp" "$preset" && echo "Installed $preset"
+    # +6 dB into the limiter: the preset's compressor cuts 8 dB and nothing
+    # restores it, so it played much quieter than without EasyEffects.
+    curl -fsSL "$url" | jq '.output["limiter#0"]["input-gain"] = 6.0' >"$preset.tmp" &&
+      mv "$preset.tmp" "$preset" && echo "Installed $preset"
   fi
   [[ -f $data/output/Off.json ]] || echo '{"output":{"blocklist":[],"plugins_order":[]}}' >"$data/output/Off.json"
   printf '{\n    "device": "%s",\n    "device-description": "Meteor Lake-P HD Audio Controller Speaker",\n    "device-profile": "Speaker",\n    "preset-name": "Laptop Speakers"\n}\n' \

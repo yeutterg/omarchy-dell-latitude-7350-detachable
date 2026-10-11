@@ -33,6 +33,8 @@ Detachable only. Git history has the exact diffs.
 - **Change:** EasyEffects runs as a user service (`--service-mode`). `install.sh`
   downloads RaduTek/EasyEffects-Presets "Surface Laptop 3.json" at commit
   4e31be58 as `~/.local/share/easyeffects/output/Laptop Speakers.json`, writes
+  with the limiter's input gain raised to +6 dB (the preset's multiband
+  compressor cuts 8 dB and nothing restores it: too quiet), writes
   an autoload rule for the `HiFi__Speaker__sink` / `Speaker` route, an empty
   `Off.json`, and sets `outputAutoloadingUsesFallback=true` /
   `outputAutoloadingFallbackPreset=Off` so other outputs are untouched. Omarchy
