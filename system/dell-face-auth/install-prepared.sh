@@ -2,9 +2,12 @@
 # Install staged code only. This does not enroll a model or enable a PAM flow.
 set -euo pipefail
 [[ $EUID == 0 ]] || { echo 'Run this installer through system authentication.' >&2; exit 1; }
-repo=/home/greg/dotfiles/omarchy-dell-latitude-7350-detachable/system/dell-face-auth
+repo=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+# Runs as root via sudo or pkexec; find the user who started it.
+user=${SUDO_USER:-$(id -un "${PKEXEC_UID:?run through sudo or pkexec}")}
+home=$(getent passwd "$user" | cut -d: -f6)
 stage=/tmp/dell-face-auth-stage/howdy
-runtime=/home/greg/.local/share/dell-face-auth
+runtime=$home/.local/share/dell-face-auth
 [[ -f $stage/recorders/dell_ir_reader.py && -f /tmp/dell-howdy-build/pam_dell_howdy.so ]]
 [[ ! -e /opt/dell-face-auth ]] || { echo '/opt/dell-face-auth already exists; inspect before replacing.' >&2; exit 1; }
 install -d -m 755 /opt/dell-face-auth /etc/dell-face-auth /usr/local/lib/security
@@ -16,7 +19,7 @@ chmod -R go-w /opt/dell-face-auth
 install -m 644 "$repo/config.ini" /etc/dell-face-auth/config.ini
 install -m 755 /tmp/dell-howdy-build/pam_dell_howdy.so /usr/local/lib/security/pam_dell_howdy.so
 install -Dm755 "$repo/dell-ir-grab" /usr/local/libexec/dell-ir-grab
-install -d -m 750 -o root -g greg /var/lib/dell-face-auth/models
+install -d -m 750 -o root -g "$(id -gn "$user")" /var/lib/dell-face-auth/models
 install -d -m 700 /var/log/dell-face-auth
 cat > /usr/local/bin/dell-howdy <<'CLI'
 #!/usr/bin/env bash

@@ -38,7 +38,7 @@ Prepared Howdy upstream source is pinned to
 Its PAM module compiled with paths under `/opt/dell-face-auth`, config under
 `/etc/dell-face-auth`, and models under `/var/lib/dell-face-auth`. Production
 code, interpreter, and configuration are root-owned; future templates will
-be root-owned and readable by Greg. The user-owned development environment
+be root-owned and readable by your user. The user-owned development environment
 is not used by privileged PAM flows.
 
 The intended desktop flow is a separate `omarchy-lock-face` PAM service running
@@ -55,7 +55,7 @@ exposure at gain 64 also failed detection. Enrollment has therefore not
 been attempted; exposure convergence alone does not establish usable imagery.
 
 Remaining verification: resolve/test the emitter, verify face detection,
-enroll Greg, test matching and rejection,
+enroll your face, test matching and rejection,
 install the dedicated PAM service, integrate the lock flow, and exercise
 unlock/fallback plus suspend/resume and reboot persistence.
 
