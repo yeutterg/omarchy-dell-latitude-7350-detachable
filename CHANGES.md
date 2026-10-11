@@ -28,24 +28,26 @@ Detachable only. Git history has the exact diffs.
 
 ### Speaker EQ with EasyEffects — 2026-10-11
 - **Files:** `packages.txt` (`easyeffects`, `calf`, `lsp-plugins-lv2`),
-  `home/.config/systemd/user/easyeffects.service`, `install.sh`
-  (`configure_easyeffects`).
-- **Change:** EasyEffects runs as a user service (`--service-mode`). `install.sh`
-  downloads RaduTek/EasyEffects-Presets "Surface Laptop 3.json" at commit
-  4e31be58 as `~/.local/share/easyeffects/output/Laptop Speakers.json`, writes
-  with the limiter's input gain raised to +6 dB (the preset's multiband
-  compressor cuts 8 dB and nothing restores it: too quiet), writes
-  an autoload rule for the `HiFi__Speaker__sink` / `Speaker` route, an empty
-  `Off.json`, and sets `outputAutoloadingUsesFallback=true` /
-  `outputAutoloadingFallbackPreset=Off` so other outputs are untouched. Omarchy
-  ships no audio effects.
+  `home/.config/systemd/user/easyeffects.service`,
+  `home/.local/share/easyeffects/output/{Laptop Speakers,Off}.json`,
+  `home/.local/share/easyeffects/autoload/output/…HiFi__Speaker__sink:Speaker.json`,
+  `install.sh` (`configure_easyeffects`: fallback preset `Off`).
+- **Change:** EasyEffects (`--service-mode`) applies "Laptop Speakers" to the
+  built-in speakers: calf bass enhancer (amount 13, harmonics 6.5, scope
+  200 Hz) → EQ (+1.5/+2/+1.5 dB at 120/160/200 Hz) → 85 Hz high-pass (x3) →
+  limiter (+4 dB in). Every other output falls back to "Off". Omarchy ships no
+  audio effects.
 - **Why:** The speakers (RT1318 amp) play uncorrected on Linux; Windows applies
-  Dell's Waves MaxxAudio tuning, which has no Linux equivalent. No published
-  tuning exists for this model, so this is a generic laptop-speaker chain.
+  Dell's Waves MaxxAudio tuning, which has no Linux equivalent. Tuned by ear.
+- **History:** Started from RaduTek's "Surface Laptop 3" preset. It loaded with
+  its high-pass as an 85 Hz *low*-pass (the EasyEffects 7 format has no filter
+  `type`, so 8.x defaults to Low-pass), and its 0.8–2 kHz cuts and compressor
+  made it quiet and muffled. Replaced with this smaller chain. More bass
+  (amount 16, +3/+4/+3 dB, +6 dB limiter) distorted.
 - **Cost:** ~80 MB of packages; a little CPU while audio plays.
 - **Watch:** The autoload file name depends on the sink name and route
   description; if PipeWire renames them, the preset stops auto-applying.
-
+  After a resume the speaker amp once stayed silent until PipeWire restarted.
 ### Built-in display at 2x — 2026-10-05
 - **File:** `home/.config/hypr/extras/60-dell-latitude-7350-detachable.lua`
 - **Change:** `hl.monitor` for `eDP-1` with `scale = 2` (Omarchy default:

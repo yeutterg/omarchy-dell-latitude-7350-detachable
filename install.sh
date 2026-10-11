@@ -79,26 +79,12 @@ configure_ollama() {
   echo "Installed $dst"
 }
 
-# EasyEffects: the "Laptop Speakers" preset on the built-in speakers only. The
-# preset is RaduTek's "Surface Laptop 3" (no license file upstream, so it's
-# downloaded at a pinned commit rather than copied here). Every other output
-# falls back to an empty "Off" preset.
+# EasyEffects: the presets and the speaker autoload rule are linked from home/;
+# every output without a rule (headphones, HDMI, Bluetooth) gets "Off".
 configure_easyeffects() {
-  local data=$HOME/.local/share/easyeffects rc=$HOME/.config/easyeffects/db/easyeffectsrc
-  local preset="$data/output/Laptop Speakers.json"
-  local sink=alsa_output.pci-0000_00_1f.3-platform-sof_sdw.HiFi__Speaker__sink
-  local url=https://raw.githubusercontent.com/RaduTek/EasyEffects-Presets/4e31be581c4f6b94d1854acb461d9bc524d25805/Surface%20Laptop%203.json
+  local rc=$HOME/.config/easyeffects/db/easyeffectsrc
   pacman -Q easyeffects &>/dev/null || return 0
-  mkdir -p "$data/output" "$data/autoload/output" "${rc%/*}"
-  if [[ ! -f $preset ]]; then
-    # +6 dB into the limiter: the preset's compressor cuts 8 dB and nothing
-    # restores it, so it played much quieter than without EasyEffects.
-    curl -fsSL "$url" | jq '.output["limiter#0"]["input-gain"] = 6.0' >"$preset.tmp" &&
-      mv "$preset.tmp" "$preset" && echo "Installed $preset"
-  fi
-  [[ -f $data/output/Off.json ]] || echo '{"output":{"blocklist":[],"plugins_order":[]}}' >"$data/output/Off.json"
-  printf '{\n    "device": "%s",\n    "device-description": "Meteor Lake-P HD Audio Controller Speaker",\n    "device-profile": "Speaker",\n    "preset-name": "Laptop Speakers"\n}\n' \
-    "$sink" >"$data/autoload/output/$sink:Speaker.json"
+  mkdir -p "${rc%/*}"
   grep -q '^outputAutoloadingUsesFallback=' "$rc" 2>/dev/null ||
     printf '\n[Window]\noutputAutoloadingUsesFallback=true\noutputAutoloadingFallbackPreset=Off\n' >>"$rc"
 }
