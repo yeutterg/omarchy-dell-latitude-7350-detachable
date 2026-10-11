@@ -1,0 +1,14 @@
+# EasyEffects in the background, so the built-in speakers get their EQ preset
+# (installed by install.sh) from login on. Other outputs get the empty "Off" preset.
+[Unit]
+Description=EasyEffects audio effects (speaker preset)
+PartOf=graphical-session.target
+After=graphical-session.target pipewire-pulse.service
+
+[Service]
+ExecStart=/usr/bin/easyeffects --service-mode
+ExecStop=/usr/bin/easyeffects --quit
+Restart=on-failure
+
+[Install]
+WantedBy=graphical-session.target

@@ -26,6 +26,24 @@ Detachable only. Git history has the exact diffs.
   hyprsunset holding `/run/user/1000/dell-brightness.lock`; verified the fixed
   startup and compositor-launched up/down commands release it.
 
+### Speaker EQ with EasyEffects — 2026-10-11
+- **Files:** `packages.txt` (`easyeffects`, `calf`, `lsp-plugins-lv2`),
+  `home/.config/systemd/user/easyeffects.service`, `install.sh`
+  (`configure_easyeffects`).
+- **Change:** EasyEffects runs as a user service (`--service-mode`). `install.sh`
+  downloads RaduTek/EasyEffects-Presets "Surface Laptop 3.json" at commit
+  4e31be58 as `~/.local/share/easyeffects/output/Laptop Speakers.json`, writes
+  an autoload rule for the `HiFi__Speaker__sink` / `Speaker` route, an empty
+  `Off.json`, and sets `outputAutoloadingUsesFallback=true` /
+  `outputAutoloadingFallbackPreset=Off` so other outputs are untouched. Omarchy
+  ships no audio effects.
+- **Why:** The speakers (RT1318 amp) play uncorrected on Linux; Windows applies
+  Dell's Waves MaxxAudio tuning, which has no Linux equivalent. No published
+  tuning exists for this model, so this is a generic laptop-speaker chain.
+- **Cost:** ~80 MB of packages; a little CPU while audio plays.
+- **Watch:** The autoload file name depends on the sink name and route
+  description; if PipeWire renames them, the preset stops auto-applying.
+
 ### Built-in display at 2x — 2026-10-05
 - **File:** `home/.config/hypr/extras/60-dell-latitude-7350-detachable.lua`
 - **Change:** `hl.monitor` for `eDP-1` with `scale = 2` (Omarchy default:

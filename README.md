@@ -15,6 +15,7 @@ that too; this repo loads after it.
 | [Volume buttons](#volume-buttons) | One step per tap, repeat only when held |
 | [Display scale](#display-scale) | Built-in panel at 2x |
 | [Low brightness](#low-brightness) | Hardware steps below 1%, with fractional percentage readouts |
+| [Speaker EQ](#speaker-eq) | EasyEffects laptop-speaker preset on the built-in speakers only |
 | [Ollama on the GPU](#ollama-on-the-gpu) | Vulkan backend and integrated-GPU support for Ollama |
 
 ### Audio fixes
@@ -46,6 +47,17 @@ Normal image brightness returns at 1% and above.
 On a fresh installation, run `omarchy plugin clone omarchy.monitor` before
 `install.sh` to activate the `greg.monitor` display panel.
 
+### Speaker EQ
+- EasyEffects runs in the background (user service) and applies a laptop-speaker
+  preset, "Laptop Speakers", to the built-in speakers: high-pass at 85 Hz, bass
+  enhancer, EQ, stereo widening, multiband compressor and limiter. Headphones,
+  HDMI and Bluetooth get an empty "Off" preset.
+- Windows uses Dell's Waves MaxxAudio tuning, which isn't available on Linux, so
+  this is RaduTek's "Surface Laptop 3" preset as a starting point, tuned by ear.
+  `install.sh` downloads it at a pinned commit (it has no license to copy here).
+- Compare: `easyeffects -l Off` and `easyeffects -l "Laptop Speakers"`; tune in
+  the EasyEffects window (`easyeffects`).
+
 ### Ollama on the GPU
 - Installs `ollama-vulkan`, Ollama's Vulkan backend, which runs on the Meteor
   Lake integrated graphics through Mesa.
@@ -68,7 +80,7 @@ systemctl --user restart wireplumber
 
 `install.sh` refuses to run on other hardware unless given `--force`. It
 installs missing packages from `packages.txt` and Ollama's drop-in from
-`system/` (asks for sudo), symlinks `home/` into `$HOME` (a real file in the way is moved to
+`system/` (asks for sudo), sets up the EasyEffects preset and its autoload rules, symlinks `home/` into `$HOME` (a real file in the way is moved to
 `<file>.pre-dotfiles`) and adds one line to `~/.config/hypr/hyprland.lua` that
 loads `~/.config/hypr/extras/*.lua` in name order. This repo's Hyprland settings
 are `extras/60-dell-latitude-7350-detachable.lua`. To uninstall, delete the

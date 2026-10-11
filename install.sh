@@ -79,6 +79,27 @@ configure_ollama() {
   echo "Installed $dst"
 }
 
+# EasyEffects: the "Laptop Speakers" preset on the built-in speakers only. The
+# preset is RaduTek's "Surface Laptop 3" (no license file upstream, so it's
+# downloaded at a pinned commit rather than copied here). Every other output
+# falls back to an empty "Off" preset.
+configure_easyeffects() {
+  local data=$HOME/.local/share/easyeffects rc=$HOME/.config/easyeffects/db/easyeffectsrc
+  local preset="$data/output/Laptop Speakers.json"
+  local sink=alsa_output.pci-0000_00_1f.3-platform-sof_sdw.HiFi__Speaker__sink
+  local url=https://raw.githubusercontent.com/RaduTek/EasyEffects-Presets/4e31be581c4f6b94d1854acb461d9bc524d25805/Surface%20Laptop%203.json
+  pacman -Q easyeffects &>/dev/null || return 0
+  mkdir -p "$data/output" "$data/autoload/output" "${rc%/*}"
+  if [[ ! -f $preset ]]; then
+    curl -fsSL "$url" -o "$preset.tmp" && mv "$preset.tmp" "$preset" && echo "Installed $preset"
+  fi
+  [[ -f $data/output/Off.json ]] || echo '{"output":{"blocklist":[],"plugins_order":[]}}' >"$data/output/Off.json"
+  printf '{\n    "device": "%s",\n    "device-description": "Meteor Lake-P HD Audio Controller Speaker",\n    "device-profile": "Speaker",\n    "preset-name": "Laptop Speakers"\n}\n' \
+    "$sink" >"$data/autoload/output/$sink:Speaker.json"
+  grep -q '^outputAutoloadingUsesFallback=' "$rc" 2>/dev/null ||
+    printf '\n[Window]\noutputAutoloadingUsesFallback=true\noutputAutoloadingFallbackPreset=Off\n' >>"$rc"
+}
+
 # Hyprland only loads ~/.config/hypr/extras/*.lua once hyprland.lua asks for it.
 # Add that one line (after Omarchy's toggles, or at the end) if it's missing.
 ensure_hypr_extras_loader() {
@@ -105,6 +126,7 @@ $loader"
 
 link_tree
 prune_stale_links
+configure_easyeffects
 enable_units
 install_packages
 configure_ollama
