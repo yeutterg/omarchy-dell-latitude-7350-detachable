@@ -51,8 +51,9 @@ Panel {
     return scalePresets
   }
   // Built-in screen rotation, via omarchy-tablet's tablet-rotate:
-  // 0-3 = normal, 90°, 180°, 270°; the fifth pill toggles auto-rotate.
-  readonly property var rotationLabels: ["0°", "90°", "180°", "270°", "Auto"]
+  // Rotate left / right a quarter turn from the current rotation; Auto
+  // toggles auto-rotate.
+  readonly property var rotationLabels: ["Rotate left", "Rotate right", "Auto"]
   readonly property string rotateCmd: Quickshell.env("HOME") + "/.local/bin/tablet-rotate"
   property int rotationTransform: 0
   property bool autoRotate: false
@@ -323,14 +324,13 @@ Panel {
   }
 
   function activateRotation(index) {
-    if (index === 4) {
+    if (index === 2) {
       if (!autoRotateAvailable) return
       autoRotate = !autoRotate
       rotateProc.command = [rotateCmd, "auto", autoRotate ? "on" : "off"]
     } else {
-      rotationTransform = index
       autoRotate = false
-      rotateProc.command = [rotateCmd, ["normal", "left", "inverted", "right"][index]]
+      rotateProc.command = [rotateCmd, "turn", index === 0 ? "left" : "right"]
     }
     if (!rotateProc.running) rotateProc.running = true
   }
@@ -956,7 +956,7 @@ Panel {
     id: rpill
     required property string label
     required property int rotationIndex
-    readonly property bool isAuto: rotationIndex === 4
+    readonly property bool isAuto: rotationIndex === 2
 
     text: label
     fontSize: Style.font.caption
@@ -968,7 +968,8 @@ Panel {
     // Auto needs iio-sensor-proxy; dimmed without it.
     opacity: isAuto && !root.autoRotateAvailable ? 0.45 : 1
 
-    active: isAuto ? root.autoRotate : (!root.autoRotate && root.rotationTransform === rotationIndex)
+    // Left/right are actions, not states; only Auto lights up.
+    active: isAuto && root.autoRotate
     hasCursor: root.cursorActive && root.focusSection === "rotation" && root.selectedIndex === rotationIndex
 
     onClicked: root.activateRotation(rotationIndex)
