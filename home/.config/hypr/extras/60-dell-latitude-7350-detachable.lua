@@ -6,14 +6,14 @@
 -- required for scroll_points and also replaces libinput's pointer profile.
 -- Points are OUTPUT velocities at input intervals of 0.2 units/ms, not gains.
 -- Slow scrolling uses 0.8x before the existing 0.4 multiplier; quick swipes
--- approach 1.6x. The final segment keeps extrapolation gentle at higher speeds.
+-- approach 2.4x. The final segment keeps extrapolation linear at higher speeds.
 hl.device({
   name = "cirque-cirque-kenai-----1066-0041-detachable-touchpad",
   natural_scroll = true,
   scroll_method = "2fg",
   scroll_factor = 0.4,
   accel_profile = "custom 0.2 0.0 0.08 0.20 0.36 0.56 0.72",
-  scroll_points = "0.2 0.0 0.16 0.36 0.70 1.12 1.44",
+  scroll_points = "0.2 0.0 0.16 0.36 0.90 1.44 1.92",
 })
 
 -- Side volume buttons report their release ~0.5s late, so Hyprland's key repeat
