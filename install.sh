@@ -113,6 +113,16 @@ $loader"
   echo "Added the hypr/extras loader to $conf"
 }
 
+# Keep the DMIC's SoundWire link awake on this Dell.
+configure_internal_mic_power() {
+  local src=$repo/system/90-dell-internal-mic-power.rules
+  local dst=/etc/udev/rules.d/90-dell-internal-mic-power.rules
+  cmp -s "$src" "$dst" || sudo install -Dm644 "$src" "$dst"
+  sudo udevadm control --reload-rules
+  sudo udevadm trigger --action=change --subsystem-match=soundwire --sysname-match='sdw-master-0-3'
+}
+
+configure_internal_mic_power
 link_tree
 prune_stale_links
 configure_easyeffects

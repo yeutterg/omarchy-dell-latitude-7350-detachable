@@ -68,6 +68,10 @@ function nodeLabel(node) {
   if (name === builtIn + "Speaker__sink") return "Built-in Speakers"
   if (name === builtIn + "Headphones__sink") return "3.5 mm Headphones"
   if (name === "easyeffects_sink") return "Audio Effects (virtual)"
+  if (name === "easyeffects_source") return "Microphone Effects (virtual)"
+  if (name === "alsa_input.pci-0000_00_1f.3-platform-sof_sdw.HiFi__Headset__source") return "Headset Microphone"
+  if (name === "alsa_input.pci-0000_00_1f.3-platform-sof_sdw.HiFi__Mic__source"
+      || name === "alsa_input.pci-0000_00_1f.3-platform-sof_sdw.HiFi__Microphone__source") return "Built-in Microphone"
   var p = nodeProps(node)
   var nickname = friendlyDeviceLabel(node.nickname || node.nick || p["node.nick"] || p["device.profile.description"] || "")
   if (nickname) return nickname
