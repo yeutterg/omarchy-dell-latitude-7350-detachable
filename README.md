@@ -15,7 +15,6 @@ that too; this repo loads after it.
 | [Volume buttons](#volume-buttons) | One step per tap, repeat only when held |
 | [Display scale](#display-scale) | Built-in panel at 2x |
 | [Low brightness](#low-brightness) | Hardware steps below 1%, with fractional percentage readouts |
-| [Rotation in the display panel](#rotation-in-the-display-panel) | Rotate left, Rotate right and Auto buttons in the bar's display panel |
 | [Speaker EQ](#speaker-eq) | EasyEffects laptop-speaker preset on the built-in speakers only |
 | [Ollama on the GPU](#ollama-on-the-gpu) | Vulkan backend and integrated-GPU support for Ollama |
 
@@ -42,18 +41,11 @@ The regular brightness buttons step through 0.81%, 0.60%, 0.40% and 0.20%
 below 1%. Because the hardware difference is subtle, hyprsunset also dims
 the image at those levels (80%, 60%, 40%, 20% image brightness respectively).
 These readouts are backlight control percentages, not measured luminance.
-The OSD and custom display panel show two decimal places below 1%.
-Normal image brightness returns at 1% and above.
-
-On a fresh installation, run `omarchy plugin clone omarchy.monitor` before
-`install.sh` to activate the `greg.monitor` display panel.
-
-### Rotation in the display panel
-The `greg.monitor` display panel has a ROTATION row under SCALE: Rotate left
-and Rotate right turn the built-in screen a quarter turn (touch and pen
-follow), and Auto follows the accelerometer. It runs omarchy-tablet's
-`tablet-rotate`; the row is hidden without it, and Auto is dimmed until
-`iio-sensor-proxy` is installed. Rotating by hand turns Auto off.
+The brightness OSD shows two decimal places below 1%. Normal image brightness
+returns at 1% and above, however brightness changes: `dell-brightness-watch`
+(a user service) resets the image dimming whenever the backlight is written,
+so the display panel's slider (1–100%) works with or without omarchy-tablet's
+display plugin.
 
 ### Speaker EQ
 - EasyEffects runs in the background (user service) and applies "Laptop

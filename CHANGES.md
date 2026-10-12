@@ -18,30 +18,20 @@ Detachable only. Git history has the exact diffs.
 - **Validation:** Hyprland reload and configuration error check; subjective
   scrolling and cursor feel still require user feedback.
 
-### Rotation row in the display panel — 2026-10-12
-- **File:** `home/.config/omarchy/plugins/greg.monitor/Panel.qml`.
-- **Change:** A ROTATION section after SCALE with three pills (Rotate left,
-  Rotate right, Auto) that call omarchy-tablet's `~/.local/bin/tablet-rotate`
-  (`turn left|right`, `auto on|off`) and read `tablet-rotate status` on
-  refresh. Only Auto shows an on state; left and right are one-off actions. Keyboard navigation works like SCALE (h/l along the row, Enter to
-  pick). Hidden when `tablet-rotate` is missing; Auto is dimmed without
-  `iio-sensor-proxy`.
-- **Why:** The Dell is a detachable, and the stock display panel has no
-  rotation.
-- **Validation:** Screenshots of the panel showed the row; `tablet-rotate
-  inverted` rotated the screen and set touch and pen transform to 2, and
-  `normal` restored it. The user confirmed rotation works on the device.
-  (First version had 0°/90°/180°/270° pills; replaced with left/right at the
-  user's request.)
-
 ### Lower hardware brightness minimum — 2026-10-10
 - **File:** `home/.config/hypr/extras/60-dell-latitude-7350-detachable.lua`.
 - **Change:** Regular brightness buttons move one hardware level at a time
   below 1% (0.81%, 0.60%, 0.40%, 0.20%). Shift + brightness down goes
   directly to level 1. `home/.local/bin/dell-brightness` shows the measured
   percentage and uses raw brightness/max values for the OSD progress bar.
-  The cloned `greg.monitor` panel preserves fractional values and reads them
-  through `dell-monitor-state`. External displays use the stock command.
+  External displays use the stock command. `home/.local/bin/dell-brightness-watch`
+  (`dell-brightness-watch.service`) watches the backlight with inotify and runs
+  `dell-brightness sync` on every write, so the image dimming is undone when
+  anything else (Omarchy's display panel slider) raises brightness.
+  **2026-10-12:** The `greg.monitor` copy of the display panel (fractional
+  readouts, plus a rotation row) and `dell-monitor-state` were removed; the
+  panel is Omarchy's own, or omarchy-tablet's display-rotation plugin, both
+  1–100%. The watcher replaced what the panel copy did for the dimming.
   Hardware-only changes were hard to distinguish visually. Below 1%,
   hyprsunset additionally scales the image to 80/60/40/20% for raw levels
   4/3/2/1; it returns to 100% at raw level 5. A user comparison confirmed

@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# Keep the sub-1% image dimming (hyprsunset gamma, see dell-brightness) in step
+# with the backlight, whatever changed it: the brightness keys, Omarchy's
+# display panel, or anything else. Each write to the backlight runs
+# `dell-brightness sync`, which sets the gamma for the new level without
+# touching the backlight itself.
+
+set -uo pipefail
+
+backlight=/sys/class/backlight/intel_backlight/brightness
+[[ -e $backlight ]] || exit 0
+
+inotifywait -q -m -e modify "$backlight" | while read -r _; do
+  "$HOME/.local/bin/dell-brightness" --no-osd --monitor eDP-1 sync
+done

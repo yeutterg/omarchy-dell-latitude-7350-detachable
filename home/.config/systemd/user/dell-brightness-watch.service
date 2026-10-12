@@ -1,0 +1,13 @@
+[Unit]
+Description=Keep sub-1% brightness dimming in step with the backlight (Dell 7350)
+After=graphical-session.target
+PartOf=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/dell-brightness-watch
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=graphical-session.target
