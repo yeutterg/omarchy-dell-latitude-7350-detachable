@@ -4,6 +4,20 @@ set -euo pipefail
 directory=$(mktemp -d /tmp/dell-display-contrast.XXXXXX)
 trap 'rm -rf -- "$directory"' EXIT
 
+if [[ ${1:-} == --white-levels ]]; then
+  images=()
+  for level in 255 250 240 224 200 160 128; do
+    printf -v color '#%02x%02x%02x' "$level" "$level" "$level"
+    image="$directory/white-level-$level.png"
+    magick -size 2880x1920 xc:'#181818' -fill "$color" \
+      -draw 'rectangle 1000,600 1399,999' "$image"
+    images+=("$image")
+  done
+  echo 'Right: white levels 255, 250, 240, 224, 200, 160, 128. Esc: close.'
+  imv -f -i dell-contrast-test -w 'Dell white-level diagnostic — Right arrow lowers white' "${images[@]}"
+  exit
+fi
+
 magick -size 2880x1920 xc:'#181818' -fill white \
   -draw 'rectangle 1000,600 1399,999' "$directory/1-white-on-dark.png"
 magick -size 2880x1920 xc:'#181818' -fill white \

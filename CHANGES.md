@@ -233,8 +233,11 @@ Detachable only. Git history has the exact diffs.
   modifiers for the next desktop session to test that path. This is a pending
   diagnostic, not a confirmed fix. After reboot at 16:44 on 2026-10-12, the
   compositor log confirmed XR24 scanout buffers with modifier 0x0 (LINEAR).
-  Visual verification is still pending. Repeat the browser-independent test
+  The user confirmed the artifact remained after that reboot, ruling out this
+  workaround. The environment overrides were removed; the existing managed
+  drop-in is now inert. Log out and back in to restore default allocation.
+  The issue remains unresolved. Repeat the browser-independent test
   using `bash system/dell-display/test-contrast.sh` (Right/Left changes patterns,
-  Esc closes; it does not modify any settings). Remove
-  `~/.config/uwsm/env-hyprland.d/60-dell-display.sh` and log in again to undo it.
+  Esc closes; it does not modify any settings). Add `--white-levels` to compare
+  rectangle levels 255, 250, 240, 224, 200, 160, and 128 on the same dark field.
   Pixel-format, full-redraw, and opaque-surface trials were reverted.

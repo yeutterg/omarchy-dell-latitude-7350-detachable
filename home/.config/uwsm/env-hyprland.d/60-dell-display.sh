@@ -1,6 +1,5 @@
-# Temporary display-artifact diagnostic for the Latitude 7350 Detachable.
-# Force simpler compositor buffers to test Intel MTL compressed scanout.
-# Takes effect on the next desktop session; ordinary config reload is insufficient.
-# Remove this file/link and log in again to restore the default allocation path.
-export AQ_NO_MODIFIERS=1
-export HYPRLAND_EGL_NO_MODIFIERS=1
+# No display environment overrides are currently required.
+# The compressed-buffer diagnostic was unsuccessful: the artifact remained
+# with verified LINEAR buffers. Its overrides were removed on 2026-10-12.
+# This empty drop-in preserves the existing managed symlink. Log out and back
+# in to return the current desktop to its default buffer allocation path.
