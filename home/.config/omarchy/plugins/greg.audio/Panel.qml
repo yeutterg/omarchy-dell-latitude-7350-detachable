@@ -57,6 +57,8 @@ Panel {
 
   property var sinkAvailability: ({})
   property bool sinkAvailabilityLoaded: false
+  property var sourceAvailability: ({})
+  property bool sourceAvailabilityLoaded: false
 
   // Identify true playback streams without reading node.properties here:
   // PwNode.properties is invalid until the node is bound, and reading it while
@@ -85,13 +87,13 @@ Panel {
   }
 
   readonly property var rawAudioSources: {
-    var list = candidateSources.slice()
-    if (source && list.indexOf(source) < 0) list.unshift(source)
+    var list = availableSources(candidateSources)
+    if (source && sourceAvailable(source) && list.indexOf(source) < 0) list.unshift(source)
     return list
   }
 
   readonly property var audioSinks: rawAudioSinks.length > 0 ? rawAudioSinks : cachedAudioSinks
-  readonly property var audioSources: rawAudioSources.length > 0 ? rawAudioSources : cachedAudioSources
+  readonly property var audioSources: rawAudioSources.length > 0 ? rawAudioSources : availableSources(cachedAudioSources)
 
   readonly property var audioStreams: {
     var list = []
@@ -495,6 +497,18 @@ Panel {
     sinkAvailabilityLoaded = true
   }
 
+  function sourceAvailable(node) {
+    return !node || !node.name || !sourceAvailabilityLoaded
+      || sourceAvailability[String(node.name)] !== false
+  }
+
+  function availableSources(nodes) {
+    var list = []
+    for (var i = 0; i < nodes.length; i++)
+      if (sourceAvailable(nodes[i])) list.push(nodes[i])
+    return list
+  }
+
   function friendlyDeviceLabel(text) {
     return Model.friendlyDeviceLabel(text)
   }
@@ -593,6 +607,19 @@ Panel {
   }
 
   Process {
+    id: sourceAvailabilityProc
+    command: ["dell-audio-source-availability"]
+    stdout: StdioCollector {
+      waitForEnd: true
+      onStreamFinished: {
+        if (!String(text).trim()) return
+        root.sourceAvailability = Model.parseSinkAvailability(text)
+        root.sourceAvailabilityLoaded = true
+      }
+    }
+  }
+
+  Process {
     id: volumeSinkProc
     command: ["omarchy-audio-output-sink"]
     stdout: StdioCollector {
@@ -606,7 +633,10 @@ Panel {
     running: root.opened
     repeat: true
     triggeredOnStart: true
-    onTriggered: if (!sinkAvailabilityProc.running) sinkAvailabilityProc.running = true
+    onTriggered: {
+      if (!sinkAvailabilityProc.running) sinkAvailabilityProc.running = true
+      if (!sourceAvailabilityProc.running) sourceAvailabilityProc.running = true
+    }
   }
 
   // Runs whether or not the panel is open: the bar shows and scrolls the output

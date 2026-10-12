@@ -3,6 +3,16 @@
 Every intentional deviation from what Omarchy ships, for the Dell Latitude 7350
 Detachable only. Git history has the exact diffs.
 
+### Hide disconnected microphone jacks — 2026-10-12
+- **Files:** Audio panel `Panel.qml` and `dell-audio-source-availability`.
+- **Change:** Hide inputs whose ports are explicitly unavailable, including the
+  unplugged Headset Microphone. Built-in Microphone and virtual inputs remain
+  visible when availability is unknown. Refresh every five seconds while the
+  panel is open, including on opening; filter cached and default entries too.
+- **Validation:** QML parsing passed. Live jack state reports the headset absent
+  and built-in microphone available; simulated connected/disconnected ports
+  confirm the helper handles both states. Plugin reloaded successfully.
+
 ### Built-in microphone restored and input labels clarified — 2026-10-12
 - **Files:** `system/dell-internal-mic/`, `install.sh`, audio plugin `Model.js`.
   Removed the old WirePlumber microphone-disable rule.

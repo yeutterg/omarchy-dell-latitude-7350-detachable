@@ -1,0 +1,16 @@
+#!/usr/bin/env python3
+"""Report input jack availability without hiding ports of unknown availability."""
+
+import json
+import subprocess
+
+result = subprocess.run(
+    ["pactl", "--format=json", "list", "sources"],
+    check=True, capture_output=True, text=True, env=None,
+)
+for source in json.loads(result.stdout):
+    ports = source.get("ports", [])
+    available = not ports or any(
+        port.get("availability") not in ("not available", "no") for port in ports
+    )
+    print(f"{source['name']}\t{int(available)}")
