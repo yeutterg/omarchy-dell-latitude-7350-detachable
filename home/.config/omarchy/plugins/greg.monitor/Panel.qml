@@ -50,6 +50,15 @@ Panel {
     }
     return scalePresets
   }
+  // Built-in screen rotation, via omarchy-tablet's tablet-rotate:
+  // 0-3 = normal, 90°, 180°, 270°; the fifth pill toggles auto-rotate.
+  readonly property var rotationLabels: ["0°", "90°", "180°", "270°", "Auto"]
+  readonly property string rotateCmd: Quickshell.env("HOME") + "/.local/bin/tablet-rotate"
+  property int rotationTransform: 0
+  property bool autoRotate: false
+  property bool autoRotateAvailable: false
+  property bool rotationAvailable: false
+
   property string focusSection: "scale"
   property int selectedIndex: 0
   property bool cursorActive: false
@@ -77,6 +86,7 @@ Panel {
     if (brightnessAvailable) list.push("brightness")
     list.push("textsize")
     list.push("scale")
+    if (rotationAvailable) list.push("rotation")
     if (displays.length > 1) list.push("monitors")
     return list
   }
@@ -85,13 +95,14 @@ Panel {
     if (section === "brightness") return 0  // only the slider sentinel at -1
     if (section === "textsize") return 0    // slider sentinel at -1, like brightness
     if (section === "scale") return scaleValues.length
+    if (section === "rotation") return rotationLabels.length
     if (section === "monitors") return displays.length
     return 0
   }
 
   function sectionIsSingleRow(section) {
     // brightness and text size are lone sliders; scale presets sit horizontally.
-    return section === "brightness" || section === "textsize" || section === "scale"
+    return section === "brightness" || section === "textsize" || section === "scale" || section === "rotation"
   }
 
   function sectionFirstIndex(section) {
@@ -133,10 +144,10 @@ Panel {
   // because adjustBrightness handles horizontal motion on the brightness
   // slider.
   function moveCursorH(delta) {
-    if (focusSection !== "scale") return
+    if (focusSection !== "scale" && focusSection !== "rotation") return
     var next = selectedIndex + delta
     if (next < 0) next = 0
-    if (next > scaleValues.length - 1) next = scaleValues.length - 1
+    if (next > sectionCount(focusSection) - 1) next = sectionCount(focusSection) - 1
     selectedIndex = next
   }
 
@@ -149,6 +160,10 @@ Panel {
   function activateCursor() {
     if (focusSection === "scale" && selectedIndex >= 0 && selectedIndex < scaleValues.length) {
       setScale(scaleValues[selectedIndex])
+      return
+    }
+    if (focusSection === "rotation" && selectedIndex >= 0 && selectedIndex < rotationLabels.length) {
+      activateRotation(selectedIndex)
       return
     }
     if (focusSection === "monitors" && selectedIndex >= 0 && selectedIndex < displays.length) {
@@ -231,6 +246,7 @@ Panel {
 
   function refresh() {
     if (!stateProc.running) stateProc.running = true
+    if (!rotateStateProc.running) rotateStateProc.running = true
   }
 
   function setBrightness(value) {
@@ -304,6 +320,19 @@ Panel {
 
     actionProc.command = ["hyprctl", "keyword", "monitor", name + (enabled ? ",disable" : ",preferred,auto,auto")]
     if (!actionProc.running) actionProc.running = true
+  }
+
+  function activateRotation(index) {
+    if (index === 4) {
+      if (!autoRotateAvailable) return
+      autoRotate = !autoRotate
+      rotateProc.command = [rotateCmd, "auto", autoRotate ? "on" : "off"]
+    } else {
+      rotationTransform = index
+      autoRotate = false
+      rotateProc.command = [rotateCmd, ["normal", "left", "inverted", "right"][index]]
+    }
+    if (!rotateProc.running) rotateProc.running = true
   }
 
   function setScale(scale) {
@@ -431,6 +460,32 @@ Panel {
     }
   }
 
+  // {"transform":0-3,"auto":bool,"sensor":bool}; missing script = no section.
+  Process {
+    id: rotateStateProc
+    command: [root.rotateCmd, "status"]
+    stdout: StdioCollector {
+      waitForEnd: true
+      onStreamFinished: {
+        try {
+          var s = JSON.parse(String(text || ""))
+          root.rotationTransform = s.transform
+          root.autoRotate = s.auto
+          root.autoRotateAvailable = s.sensor
+          root.rotationAvailable = true
+        } catch (e) {
+          root.rotationAvailable = false
+        }
+      }
+    }
+  }
+
+  Process {
+    id: rotateProc
+    stdout: StdioCollector { waitForEnd: true }
+    onRunningChanged: if (!running) root.refresh()
+  }
+
   Process {
     id: actionProc
     stdout: StdioCollector { waitForEnd: true }
@@ -502,7 +557,7 @@ Panel {
         else if (dx !== 0) {
           if (root.focusSection === "brightness") root.adjustBrightness(dx * 5)
           else if (root.focusSection === "textsize") root.adjustTextSize(dx)
-          else if (root.focusSection === "scale") root.moveCursorH(dx)
+          else if (root.focusSection === "scale" || root.focusSection === "rotation") root.moveCursorH(dx)
         }
       }
       onActivateRequested: if (root.cursorActive) root.activateCursor()
@@ -792,6 +847,46 @@ Panel {
             }
           }
 
+          // ---------- Rotation ----------
+          PanelSeparator {
+            visible: root.rotationAvailable
+            foreground: root.bar.foreground
+          }
+
+          Column {
+            visible: root.rotationAvailable
+            width: parent.width
+            spacing: Style.space(10)
+
+            PanelSectionHeader {
+              text: "ROTATION"
+              foreground: root.bar.foreground
+              fontFamily: root.bar.fontFamily
+            }
+
+            Grid {
+              id: rotationRow
+              width: parent.width
+              columns: root.rotationLabels.length
+              spacing: Style.spacing.xs
+
+              readonly property real cellWidth: (width - spacing * (columns - 1)) / columns
+
+              Repeater {
+                model: root.rotationLabels
+
+                RotationPill {
+                  required property string modelData
+                  required property int index
+
+                  label: modelData
+                  rotationIndex: index
+                  width: rotationRow.cellWidth
+                }
+              }
+            }
+          }
+
           // ---------- Monitors ----------
           PanelSeparator {
             visible: root.displays.length > 1
@@ -854,6 +949,34 @@ Panel {
       root.cursorActive = true
       root.focusSection = "scale"
       root.selectedIndex = pill.scaleIndex
+    }
+  }
+
+  component RotationPill: Button {
+    id: rpill
+    required property string label
+    required property int rotationIndex
+    readonly property bool isAuto: rotationIndex === 4
+
+    text: label
+    fontSize: Style.font.caption
+    foreground: root.bar.foreground
+    fontFamily: root.bar.fontFamily
+    horizontalPadding: Style.spacing.sm
+    verticalPadding: Style.spacing.controlPaddingY
+    bordered: true
+    // Auto needs iio-sensor-proxy; dimmed without it.
+    opacity: isAuto && !root.autoRotateAvailable ? 0.45 : 1
+
+    active: isAuto ? root.autoRotate : (!root.autoRotate && root.rotationTransform === rotationIndex)
+    hasCursor: root.cursorActive && root.focusSection === "rotation" && root.selectedIndex === rotationIndex
+
+    onClicked: root.activateRotation(rotationIndex)
+    onHovered: function(isHovered) {
+      if (!isHovered || root.reflowingText) return
+      root.cursorActive = true
+      root.focusSection = "rotation"
+      root.selectedIndex = rpill.rotationIndex
     }
   }
 

@@ -3,6 +3,20 @@
 Every intentional deviation from what Omarchy ships, for the Dell Latitude 7350
 Detachable only. Git history has the exact diffs.
 
+### Rotation row in the display panel — 2026-10-12
+- **File:** `home/.config/omarchy/plugins/greg.monitor/Panel.qml`.
+- **Change:** A ROTATION section after SCALE with five pills (0°, 90°, 180°,
+  270°, Auto) that call omarchy-tablet's `~/.local/bin/tablet-rotate`
+  (`normal|left|inverted|right`, `auto on|off`) and read `tablet-rotate status`
+  on refresh. Keyboard navigation works like SCALE (h/l along the row, Enter to
+  pick). Hidden when `tablet-rotate` is missing; Auto is dimmed without
+  `iio-sensor-proxy`.
+- **Why:** The Dell is a detachable, and the stock display panel has no
+  rotation.
+- **Validation:** Screenshot of the panel showed the row with 0° active and Auto
+  dimmed; `tablet-rotate inverted` rotated the screen and set touch and pen
+  transform to 2, and `normal` restored it.
+
 ### Lower hardware brightness minimum — 2026-10-10
 - **File:** `home/.config/hypr/extras/60-dell-latitude-7350-detachable.lua`.
 - **Change:** Regular brightness buttons move one hardware level at a time
