@@ -7,9 +7,11 @@ Detachable only. Git history has the exact diffs.
 - **File:** `home/.config/hypr/extras/60-dell-latitude-7350-detachable.lua`.
 - **Change:** A device-specific custom libinput profile for the Cirque touchpad.
   Natural two-finger scrolling retains the 0.4 base multiplier; slow gestures
-  use a 0.8x curve multiplier and fast swipes approach 2.4x. Following user
-  feedback, the initial slow curve was reduced by about 20% and the fast
-  curve increased by about 40–50%, keeping the slow points fixed. Hyprland requires
+  use a 0.8x curve multiplier. Following user feedback, the initial slow curve
+  was reduced by about 20%, ordinary fast swipes were boosted, and a further
+  high-speed ramp was added: 3.5x at 1.2 units/ms and 5x at 1.4 units/ms
+  and above. The existing curve through 1.0 units/ms is unchanged.
+  Hyprland requires
   a custom pointer profile to enable scroll acceleration, so a gentle cursor
   curve is supplied too. Other pointer devices retain their existing settings.
   Momentum after finger release remains application-dependent.

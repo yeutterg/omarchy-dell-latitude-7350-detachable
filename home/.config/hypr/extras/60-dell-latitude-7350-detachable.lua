@@ -2,18 +2,19 @@
 -- Detachable only. Linked into ~/.config/hypr/extras/ by install.sh; loads after
 -- omarchy-tablet's 50-tablet.lua, so it can override it.
 
--- Gentle acceleration for the detachable touchpad only. A custom profile is
+-- Progressive acceleration for the detachable touchpad only. A custom profile is
 -- required for scroll_points and also replaces libinput's pointer profile.
 -- Points are OUTPUT velocities at input intervals of 0.2 units/ms, not gains.
--- Slow scrolling uses 0.8x before the existing 0.4 multiplier; quick swipes
--- approach 2.4x. The final segment keeps extrapolation linear at higher speeds.
+-- Slow scrolling uses 0.8x before the existing 0.4 multiplier. Ordinary swipes
+-- keep their previous curve; very fast swipes ramp to 5x at 1.6 units/ms.
+-- Above that, the last segment extrapolates linearly with a slope of 5.
 hl.device({
   name = "cirque-cirque-kenai-----1066-0041-detachable-touchpad",
   natural_scroll = true,
   scroll_method = "2fg",
   scroll_factor = 0.4,
   accel_profile = "custom 0.2 0.0 0.08 0.20 0.36 0.56 0.72",
-  scroll_points = "0.2 0.0 0.16 0.36 0.90 1.44 1.92",
+  scroll_points = "0.2 0.0 0.16 0.36 0.90 1.44 1.92 4.20 7.00 8.00",
 })
 
 -- Side volume buttons report their release ~0.5s late, so Hyprland's key repeat
