@@ -3,6 +3,28 @@
 Every intentional deviation from what Omarchy ships, for the Dell Latitude 7350
 Detachable only. Git history has the exact diffs.
 
+### Built-in microphone restored and input labels clarified — 2026-10-12
+- **Files:** `system/dell-internal-mic/`, `install.sh`, audio plugin `Model.js`.
+  Removed the old WirePlumber microphone-disable rule.
+- **Change:** DKMS replacement `dell-internal-mic/7.2.8`, containing the unmodified
+  RT712/RT1713 microphone source and headers from Linux stable v7.2.8. Includes
+  upstream stream-type initialization fix 03a5699a0a04. It uses stable upstream
+  cache-resume behavior rather than Omarchy 7.2.5's stricter backported behavior,
+  which failed with -61/-22 and could remove the HiFi profile.
+  The default recording device is now the physical built-in microphone.
+  Input labels distinguish Built-in Microphone, Headset Microphone, and
+  Microphone Effects (virtual). Technical node names are unchanged.
+- **Validation:** Successful direct ALSA recording, then nonzero stereo PipeWire
+  recordings with the stable module, normal format negotiation, WirePlumber
+  restart, and a 15-second suspend/resume. No new audio-driver errors after resume.
+  Speaker profile remained available; original speaker volume/mute restored.
+  Full speech quality and longer-term resume reliability need ordinary use.
+- **Trials removed:** Keeping the codec awake broke UCM mute writes; keeping its
+  SoundWire link awake did not fix the stock driver. A forced 32-bit format alone
+  still recorded silence. No trial power rule or format override is retained.
+  One failed stock-driver reprobe crashed WirePlumber in libspa-alsa; controller
+  rebind restored the stack. The stock kernel itself remains installed.
+
 ### Clear audio output choices — 2026-10-12
 - **Files:** `home/.config/omarchy/plugins/greg.audio/` (cloned stock audio panel).
 - **Change:** Label the Dell speaker output "Built-in Speakers" and its headphone
@@ -132,6 +154,8 @@ Detachable only. Git history has the exact diffs.
   `omarchy-audio-output-volume`, update these.
 
 ### Disable the internal mic (DMIC) — 2026-10-05
+- **Superseded 2026-10-12:** Removed after the stable upstream driver replacement
+  passed real recording and suspend/resume checks; see above.
 - **File:** `home/.config/wireplumber/wireplumber.conf.d/disable-internal-mic.conf`
 - **Change:** `node.disabled = true` for the `sof-soundwire` node on ALSA
   PCM 4 (the rt713 DMIC, "Microphone").
@@ -180,8 +204,8 @@ Detachable only. Git history has the exact diffs.
   the internal mic failed in the kernel (`rt712-sdca-dmic … ASoC error (-61)`),
   then the codec stopped responding (`SCP Msg trf timed out`). While it is stuck,
   the UCM `HiFi` profile cannot initialise and there is no audio output at all.
-  A reboot resets it. Recurred after a resume on 2026-10-05; the internal mic is
-  now disabled (see "Disable the internal mic" above).
+  A reboot resets it. Recurred after a resume on 2026-10-05. The 2026-10-12
+  stable-driver replacement restored recording and passed a suspend/resume test.
 
 - **Chromium display artifacts** — 2026-10-05. Light-leak / faded-polarizer-like
   artifacts in Chromium. Not caused by window transparency: they remained with

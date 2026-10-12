@@ -11,7 +11,7 @@ that too; this repo loads after it.
 
 | Customization | Summary |
 |---|---|
-| [Audio fixes](#audio-fixes) | Working sound: WirePlumber's camera monitor and the flaky internal mic are disabled |
+| [Audio fixes](#audio-fixes) | Working sound: camera monitor disabled, stable upstream microphone driver |
 | [Volume buttons](#volume-buttons) | One step per tap, repeat only when held |
 | [Display scale](#display-scale) | Built-in panel at 2x |
 | [Low brightness](#low-brightness) | Hardware steps below 1%, with fractional percentage readouts |
@@ -22,9 +22,11 @@ that too; this repo loads after it.
 - **Camera monitor off:** WirePlumber stalls on the IPU6 camera's raw nodes,
   leaving the card on the `off` profile with no sound. Cost: cameras aren't
   exposed through PipeWire (apps opening `/dev/video*` directly still work).
-- **Internal mic off:** after suspend the DMIC can fail to wake, and opening it
-  then jams the card until reboot. The headset-jack mic still works.
-- Both can be removed once the kernel/WirePlumber/camera driver bugs are fixed.
+- **Built-in microphone restored:** the RT1713 driver from Linux stable 7.2.8
+  replaces the affected Omarchy module via DKMS. Real PipeWire recordings work
+  after WirePlumber restart and a suspend/resume test. No power-management
+  workaround is retained. See [driver details and rollback](system/dell-internal-mic/README.md).
+- Remove these workarounds once the stock drivers have been verified on this hardware.
 
 ### Volume buttons
 The side buttons report their release ~470 ms late, so Hyprland's key repeat

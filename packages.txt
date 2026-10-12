@@ -1,6 +1,8 @@
 # Packages install.sh installs with pacman if they're missing.
 # ollama-vulkan: Ollama's Vulkan backend, so models can run on the Intel integrated GPU.
 ollama-vulkan
+# Build the stable upstream built-in microphone module for the installed kernel.
+dkms
 # EasyEffects and the LV2 plugins its laptop-speaker preset uses (bass enhancer: calf;
 # filter, multiband compressor, limiter: lsp-plugins).
 easyeffects

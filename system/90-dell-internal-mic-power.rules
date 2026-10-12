@@ -1,6 +1,0 @@
-# RT1713 DMIC: keep SoundWire link 3 awake while allowing the codec itself to
-# autosuspend (its register cache must remain usable for idle mixer writes).
-# Keeping the codec awake directly breaks ALSA UCM mute writes on this hardware.
-# System suspend remains permitted;
-# suspend/resume validation is required separately. Costs some idle power.
-ACTION=="add|change", SUBSYSTEM=="soundwire", KERNEL=="sdw-master-0-3", ATTR{power/control}="on"

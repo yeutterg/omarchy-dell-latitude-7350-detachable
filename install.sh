@@ -113,21 +113,29 @@ $loader"
   echo "Added the hypr/extras loader to $conf"
 }
 
-# Keep the DMIC's SoundWire link awake on this Dell.
-configure_internal_mic_power() {
-  local src=$repo/system/90-dell-internal-mic-power.rules
-  local dst=/etc/udev/rules.d/90-dell-internal-mic-power.rules
-  cmp -s "$src" "$dst" || sudo install -Dm644 "$src" "$dst"
-  sudo udevadm control --reload-rules
-  sudo udevadm trigger --action=change --subsystem-match=soundwire --sysname-match='sdw-master-0-3'
+# Stable upstream RT1713 driver: fixes stream setup and restores working resume.
+configure_internal_mic_driver() {
+  local src=$repo/system/dell-internal-mic
+  if [[ ! -f /lib/modules/$(uname -r)/build/Makefile ]]; then
+    echo "Install the headers matching $(uname -r) before installing the microphone driver."
+    return 1
+  fi
+  if dkms status -m dell-internal-mic -v 7.2.8 -k "$(uname -r)" | grep -q ': installed'; then
+    return 0
+  fi
+  sudo install -d /usr/src/dell-internal-mic-7.2.8
+  sudo cp "$src"/{rt712-sdca-dmic.c,rt712-sdca-dmic.h,rt712-sdca.h,Makefile,dkms.conf,LICENSE} /usr/src/dell-internal-mic-7.2.8/
+  sudo dkms install dell-internal-mic/7.2.8
+  sudo limine-mkinitcpio
+  echo "Installed the microphone driver; reboot to load it."
 }
 
-configure_internal_mic_power
+install_packages
+configure_internal_mic_driver
 link_tree
 prune_stale_links
 configure_easyeffects
 enable_units
-install_packages
 configure_ollama
 ensure_hypr_extras_loader
 
