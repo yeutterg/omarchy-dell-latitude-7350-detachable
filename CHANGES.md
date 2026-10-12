@@ -220,3 +220,21 @@ Detachable only. Git history has the exact diffs.
 - **Chromium display artifacts** — 2026-10-05. Light-leak / faded-polarizer-like
   artifacts in Chromium. Not caused by window transparency: they remained with
   every window forced opaque, so that override was removed.
+  Investigation on 2026-10-12 reproduced the effect above white squares in a
+  native fullscreen image viewer, including with PSR2 disabled and full-screen
+  damage redraws enabled. A gray square and uniform dark-gray field were clean.
+  Screenshot pixels were exactly the expected flat colors with sharp edges;
+  the physical-screen effect did not appear in the capture. Forcing Chromium
+  and Foot opaque, including ignoring surface alpha, did not fix it. Changing
+  output from XRGB8888 to XRGB2101010 changed the artifact from yellow/red to
+  green, but did not remove it. No display-link errors or GPU resets were found.
+  Baseline scanout used Intel MTL RC_CCS_CC compressed tiled buffers (modifier
+  0x010000000000000f). A temporary UWSM environment drop-in disables DRM/EGL
+  modifiers for the next desktop session to test that path. This is a pending
+  diagnostic, not a confirmed fix. After reboot at 16:44 on 2026-10-12, the
+  compositor log confirmed XR24 scanout buffers with modifier 0x0 (LINEAR).
+  Visual verification is still pending. Repeat the browser-independent test
+  using `bash system/dell-display/test-contrast.sh` (Right/Left changes patterns,
+  Esc closes; it does not modify any settings). Remove
+  `~/.config/uwsm/env-hyprland.d/60-dell-display.sh` and log in again to undo it.
+  Pixel-format, full-redraw, and opaque-surface trials were reverted.
