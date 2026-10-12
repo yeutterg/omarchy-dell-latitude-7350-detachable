@@ -3,6 +3,20 @@
 Every intentional deviation from what Omarchy ships, for the Dell Latitude 7350
 Detachable only. Git history has the exact diffs.
 
+### Clear audio output choices — 2026-10-12
+- **Files:** `home/.config/omarchy/plugins/greg.audio/` (cloned stock audio panel).
+- **Change:** Label the Dell speaker output "Built-in Speakers" and its headphone
+  jack "3.5 mm Headphones". Hide `easyeffects_sink` from the output picker:
+  it is an internal processing endpoint, needed for EasyEffects speaker EQ.
+  Resolve the selected output through the existing physical-volume sink so
+  the hardware row remains selected when processing is the default.
+  PipeWire node names and EasyEffects autoload rules are unchanged.
+- **Activation:** The live shell configuration selects `greg.audio` instead of
+  `omarchy.audio`. On another installation, replace that widget ID in
+  `~/.config/omarchy/shell.json` after running `install.sh`.
+- **Validation:** QML parsing and model label checks. No audio routing, volume,
+  mute state, or effects preset changes.
+
 ### Detachable touchpad scroll acceleration — 2026-10-12
 - **File:** `home/.config/hypr/extras/60-dell-latitude-7350-detachable.lua`.
 - **Change:** A device-specific custom libinput profile for the Cirque touchpad.
