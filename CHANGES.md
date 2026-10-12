@@ -3,6 +3,18 @@
 Every intentional deviation from what Omarchy ships, for the Dell Latitude 7350
 Detachable only. Git history has the exact diffs.
 
+### Detachable touchpad scroll acceleration — 2026-10-12
+- **File:** `home/.config/hypr/extras/60-dell-latitude-7350-detachable.lua`.
+- **Change:** A device-specific custom libinput profile for the Cirque touchpad.
+  Natural two-finger scrolling retains the 0.4 base multiplier; slow gestures
+  use a 0.8x curve multiplier and fast swipes approach 1.6x. The initial slow
+  curve was reduced by about 20% following user feedback. Hyprland requires
+  a custom pointer profile to enable scroll acceleration, so a gentle cursor
+  curve is supplied too. Other pointer devices retain their existing settings.
+  Momentum after finger release remains application-dependent.
+- **Validation:** Hyprland reload and configuration error check; subjective
+  scrolling and cursor feel still require user feedback.
+
 ### Rotation row in the display panel — 2026-10-12
 - **File:** `home/.config/omarchy/plugins/greg.monitor/Panel.qml`.
 - **Change:** A ROTATION section after SCALE with five pills (0°, 90°, 180°,
