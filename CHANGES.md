@@ -251,3 +251,7 @@ Detachable only. Git history has the exact diffs.
   The user still saw the artifact after the 240/255 trial. Further reductions
   are paused until the live shader configuration and physical effect can be
   checked; syntax validation alone does not verify the running output.
+  The user confirmed the configured shader path and no config errors.
+  `system/dell-display/test-highlight-cap.sh` temporarily compares 240, 224,
+  200, 160, and 128 in normal apps, advancing on Enter and restoring the prior
+  shader on exit. No permanent brightness or display configuration is changed.
