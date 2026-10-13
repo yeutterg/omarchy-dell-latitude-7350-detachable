@@ -3,6 +3,17 @@
 Every intentional deviation from what Omarchy ships, for the Dell Latitude 7350
 Detachable only. Git history has the exact diffs.
 
+### On-screen keyboard: detect the keyboard dock by its touchpad — 2026-10-12
+- **File:** `home/.config/omarchy/onscreen-keyboard.json` —
+  `{"detachableDevice": "1066 0041 Detachable"}` for the
+  io.github.yeutterg.onscreen-keyboard plugin.
+- **Why:** intel-hid only creates "Intel HID switches" on the switch's first
+  change after boot, so the keyboard plugin couldn't tell it was detached and
+  never popped up. The dock's Cirque devices ("Cirque Cirque Kenai 1066 0041
+  Detachable Mouse/Touchpad") exist only while attached.
+- **Watch:** if the dock's devices are renamed by a kernel update, the keyboard
+  falls back to the switch alone.
+
 ### Hide disconnected microphone jacks — 2026-10-12
 - **Files:** Audio panel `Panel.qml` and `dell-audio-source-availability`.
 - **Change:** Hide inputs whose ports are explicitly unavailable, including the

@@ -15,6 +15,7 @@ that too; this repo loads after it.
 | [Volume buttons](#volume-buttons) | One step per tap, repeat only when held |
 | [Display scale](#display-scale) | Built-in panel at 2x |
 | [Low brightness](#low-brightness) | Hardware steps below 1%, with fractional percentage readouts |
+| [Keyboard dock detection](#keyboard-dock-detection) | The on-screen keyboard knows when the keyboard is attached, even at login |
 | [Speaker EQ](#speaker-eq) | EasyEffects laptop-speaker preset on the built-in speakers only |
 | [Ollama on the GPU](#ollama-on-the-gpu) | Vulkan backend and integrated-GPU support for Ollama |
 
@@ -48,6 +49,14 @@ returns at 1% and above, however brightness changes: `dell-brightness-watch`
 (a user service) resets the image dimming whenever the backlight is written,
 so the display panel's slider (1–100%) works with or without omarchy-tablet's
 display plugin.
+
+### Keyboard dock detection
+`~/.config/omarchy/onscreen-keyboard.json` tells the on-screen keyboard plugin
+(installed by omarchy-tablet) which input device only exists while the
+keyboard is attached: the dock's Cirque touchpad (`1066 0041 Detachable`).
+This 7350's tablet-mode switch only appears after its first change, so
+without this the keyboard couldn't know it was detached right after login.
+Other keyboard options can go in the same file.
 
 ### Speaker EQ
 - EasyEffects runs in the background (user service) and applies "Laptop
