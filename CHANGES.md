@@ -241,3 +241,8 @@ Detachable only. Git history has the exact diffs.
   Esc closes; it does not modify any settings). Add `--white-levels` to compare
   rectangle levels 255, 250, 240, 224, 200, 160, and 128 on the same dark field.
   Pixel-format, full-redraw, and opaque-surface trials were reverted.
+  The white-level test showed artifacts only at 255; 250 and all lower test
+  levels were clean. A final-output screen shader now caps each RGB channel
+  at 250/255, leaving darker values and alpha unchanged. Software cursors keep
+  the pointer within the same cap. This is a workaround awaiting normal-app
+  verification, not a confirmed repair of the underlying panel/output issue.
