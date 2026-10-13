@@ -248,3 +248,6 @@ Detachable only. Git history has the exact diffs.
   was lowered to the next tested level, 240. Software cursors keep
   the pointer within the same cap. This is a workaround awaiting normal-app
   verification, not a confirmed repair of the underlying panel/output issue.
+  The user still saw the artifact after the 240/255 trial. Further reductions
+  are paused until the live shader configuration and physical effect can be
+  checked; syntax validation alone does not verify the running output.
