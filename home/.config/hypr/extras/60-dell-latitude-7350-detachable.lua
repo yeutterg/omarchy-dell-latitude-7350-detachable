@@ -60,7 +60,8 @@ o.bind("XF86AudioLowerVolume", nil, volume_release, { locked = true, release = t
 hl.monitor({ output = "eDP-1", mode = "preferred", position = "auto", scale = 2 })
 
 -- Panel artifact workaround: full white triggered a physical-screen halo;
--- 250/255 and below were clean. Resolve the managed symlink so this works
+-- 250/255 helped but left a faint artifact in normal apps; now test 240/255.
+-- Resolve the managed symlink so this works
 -- immediately and also when the repository is installed at another location.
 local display_config = io.popen('readlink -f -- "$HOME/.config/hypr/extras/60-dell-latitude-7350-detachable.lua"')
 local display_config_path = display_config:read("*l")
