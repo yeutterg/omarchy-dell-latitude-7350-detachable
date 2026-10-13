@@ -242,16 +242,13 @@ Detachable only. Git history has the exact diffs.
   rectangle levels 255, 250, 240, 224, 200, 160, and 128 on the same dark field.
   Pixel-format, full-redraw, and opaque-surface trials were reverted.
   The white-level test showed artifacts only at 255; 250 and all lower test
-  levels were clean. A final-output screen shader now caps each RGB channel
-  at 240/255, leaving darker values and alpha unchanged. The initial 250/255
-  cap improved normal apps but the user still saw a faint artifact, so the cap
-  was lowered to the next tested level, 240. Software cursors keep
-  the pointer within the same cap. This is a workaround awaiting normal-app
-  verification, not a confirmed repair of the underlying panel/output issue.
-  The user still saw the artifact after the 240/255 trial. Further reductions
-  are paused until the live shader configuration and physical effect can be
-  checked; syntax validation alone does not verify the running output.
-  The user confirmed the configured shader path and no config errors.
-  `system/dell-display/test-highlight-cap.sh` temporarily compares 240, 224,
-  200, 160, and 128 in normal apps, advancing on Enter and restoring the prior
-  shader on exit. No permanent brightness or display configuration is changed.
+  levels initially appeared clean. A final-output highlight cap at 250/255
+  seemed to help normal apps, but neither 240 nor a follow-up sweep through
+  240, 224, 200, 160, and 128 removed the artifact. The user confirmed the
+  configured shader path and no config errors before the sweep. This approach
+  was abandoned: the highlight shader and its software-cursor override were
+  removed. The temporary sweep script remains as a diagnostic, with automatic
+  restoration of the prior shader. No highlight cap is enabled by this repo.
+  The remaining effect has not been identified. An independent OS comparison
+  with the same white-on-dark pattern would distinguish the Linux display path
+  from a panel-side effect more effectively than more compositor tweaks.
