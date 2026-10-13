@@ -59,6 +59,20 @@ o.bind("XF86AudioLowerVolume", nil, volume_release, { locked = true, release = t
 -- so it doesn't depend on Hyprland's guess; an integer scale keeps text crisp.
 hl.monitor({ output = "eDP-1", mode = "preferred", position = "auto", scale = 2 })
 
+-- Partial panel-artifact mitigation. Removing this cap made the artifact much
+-- worse; it reduces the effect but does not eliminate it. Resolve the managed
+-- symlink so the shader is found wherever this repository is installed.
+local display_config = io.popen('readlink -f -- "$HOME/.config/hypr/extras/60-dell-latitude-7350-detachable.lua"')
+local display_config_path = display_config:read("*l")
+display_config:close()
+assert(display_config_path, "Cannot resolve Dell display configuration")
+local shader_path = display_config_path:gsub("/extras/[^/]+$", "/shaders/dell-highlight-cap.frag")
+hl.config({
+  decoration = { screen_shader = shader_path },
+  -- Composite the pointer too, so its white pixels cannot bypass the cap.
+  cursor = { no_hardware_cursors = 1 },
+})
+
 -- Fractional hardware steps below 1%, with accurate OSD readout.
 for _, key in ipairs({ "XF86MonBrightnessDown", "XF86MonBrightnessUp", "SHIFT + XF86MonBrightnessDown" }) do
   hl.unbind(key)

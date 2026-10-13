@@ -245,10 +245,12 @@ Detachable only. Git history has the exact diffs.
   levels initially appeared clean. A final-output highlight cap at 250/255
   seemed to help normal apps, but neither 240 nor a follow-up sweep through
   240, 224, 200, 160, and 128 removed the artifact. The user confirmed the
-  configured shader path and no config errors before the sweep. This approach
-  was abandoned: the highlight shader and its software-cursor override were
-  removed. The temporary sweep script remains as a diagnostic, with automatic
-  restoration of the prior shader. No highlight cap is enabled by this repo.
+  configured shader path and no config errors before the sweep. Removing the
+  cap and reloading made the artifact much worse, so the 240/255 shader and
+  software-cursor override were restored as a confirmed partial mitigation.
+  The effect remains visible: this is not a complete fix and its underlying
+  cause is still unknown. The temporary sweep script remains as a diagnostic,
+  with automatic restoration of the prior shader.
   The remaining effect has not been identified. An independent OS comparison
   with the same white-on-dark pattern would distinguish the Linux display path
   from a panel-side effect more effectively than more compositor tweaks.
