@@ -8,3 +8,5 @@ dkms
 easyeffects
 calf
 lsp-plugins-lv2
+# Dell battery/charger power-profile transitions.
+power-profiles-daemon

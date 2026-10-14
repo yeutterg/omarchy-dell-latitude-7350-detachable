@@ -17,6 +17,7 @@ that too; this repo loads after it.
 | [Low brightness](#low-brightness) | Hardware steps below 1%, with fractional percentage readouts |
 | [Keyboard dock detection](#keyboard-dock-detection) | The on-screen keyboard knows when the keyboard is attached, even at login |
 | [Speaker EQ](#speaker-eq) | EasyEffects laptop-speaker preset on the built-in speakers only |
+| [Power management](system/dell-power/README.md) | Automatic sleep after locking, battery profiles, and timed hibernation |
 | [Ollama on the GPU](#ollama-on-the-gpu) | Vulkan backend and integrated-GPU support for Ollama |
 
 ### Audio fixes

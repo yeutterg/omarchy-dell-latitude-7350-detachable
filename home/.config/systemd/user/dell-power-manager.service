@@ -1,0 +1,13 @@
+[Unit]
+Description=Dell tablet automatic sleep and battery power policy
+After=wayland-session-waitenv.service omarchy-shell.service
+PartOf=graphical-session.target
+ConditionEnvironment=WAYLAND_DISPLAY
+
+[Service]
+ExecStart=%h/.local/bin/dell-power-manager
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=graphical-session.target

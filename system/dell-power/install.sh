@@ -1,0 +1,71 @@
+#!/bin/bash
+# Run as the desktop user in a terminal, not as root.
+set -euo pipefail
+repo=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd)
+[[ $(cat /sys/class/dmi/id/product_name) == 'Latitude 7350 Detachable' ]] || {
+  echo 'This policy is only for the Dell Latitude 7350 Detachable.' >&2; exit 1;
+}
+[[ $EUID != 0 ]] || { echo 'Run as the desktop user; sudo is used for system files.' >&2; exit 1; }
+
+busctl call org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager CanHibernate | grep -q '"yes"' || {
+  echo 'Hibernation is unavailable. Fix swap/resume before installing this policy.' >&2; exit 1;
+}
+offset=$(sudo btrfs inspect-internal map-swapfile -r /swap/swapfile)
+[[ $offset == "$(cat /sys/power/resume_offset)" ]] || {
+  echo 'Swap resume offset is stale. Run omarchy-hibernation-setup and reboot first.' >&2; exit 1;
+}
+[[ $(findmnt -n -o MAJ:MIN -T /swap/swapfile) == "$(cat /sys/power/resume)" ]] || {
+  echo 'Swap resume device does not match the active root device.' >&2; exit 1;
+}
+command -v powerprofilesctl >/dev/null
+
+link_file() {
+  local relative=$1 target=$HOME/$1
+  mkdir -p -- "$(dirname -- "$target")"
+  if [[ -e $target && ! -L $target ]]; then
+    cp -a -- "$target" "$target.pre-dell-power"
+  fi
+  ln -sfn -- "$repo/home/$relative" "$target"
+}
+link_file .local/bin/dell-power-manager
+link_file .config/systemd/user/dell-power-manager.service
+link_file .config/systemd/user/easyeffects.service
+if [[ -e $HOME/.config/systemd/user/stay-awake-cover.service ]]; then
+  link_file .config/systemd/user/stay-awake-cover.service.d/60-dell-audio.conf
+fi
+
+sudo install -Dm644 "$repo/system/dell-power/60-dell-sleep.conf" /etc/systemd/sleep.conf.d/60-dell-sleep.conf
+sudo install -Dm644 "$repo/system/dell-power/60-dell-logind.conf" /etc/systemd/logind.conf.d/60-dell-logind.conf
+if ! sudo test -e /etc/UPower/UPower.conf.pre-dell-power; then
+  sudo cp -a /etc/UPower/UPower.conf /etc/UPower/UPower.conf.pre-dell-power
+fi
+# Preserve unrelated UPower settings and comments; update only this policy.
+sudo python - "$repo/system/dell-power/UPower.conf" <<'PY'
+import configparser
+from pathlib import Path
+import re
+import sys
+policy = configparser.ConfigParser()
+policy.optionxform = str
+policy.read(sys.argv[1])
+path = Path('/etc/UPower/UPower.conf')
+text = path.read_text()
+for key, value in policy['UPower'].items():
+    pattern = rf'(?m)^{re.escape(key)}\s*=.*$'
+    if re.search(pattern, text):
+        text = re.sub(pattern, f'{key}={value}', text)
+    else:
+        text = text.replace('[UPower]', f'[UPower]\n{key}={value}', 1)
+path.write_text(text)
+PY
+sudo systemctl daemon-reload
+sudo systemctl restart upower.service
+# logind reloads without ending the session; do not restart logind.
+sudo systemctl reload systemd-logind.service
+systemctl --user daemon-reload
+systemctl --user enable --now easyeffects.service dell-power-manager.service
+systemctl --user restart easyeffects.service dell-power-manager.service
+if [[ -e $HOME/.config/systemd/user/stay-awake-cover.service ]]; then
+  systemctl --user restart stay-awake-cover.service
+fi
+echo 'Installed. EasyEffects is hidden; the Dell policy is active. Verify hibernate/resume before relying on overnight standby.'

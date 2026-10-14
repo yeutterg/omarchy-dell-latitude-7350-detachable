@@ -265,3 +265,20 @@ Detachable only. Git history has the exact diffs.
   The remaining effect has not been identified. An independent OS comparison
   with the same white-on-dark pattern would distinguish the Linux display path
   from a panel-side effect more effectively than more compositor tweaks.
+
+# Power and startup — 2026-10-13
+
+- EasyEffects now starts with `--service-mode --hide-window`, preserving the
+  speaker preset without opening its window at login.
+- Prior-boot logs showed repeated locking but no suspend until UPower's
+  critical-battery request at 20:54:22; the journal ends at s2idle entry. The
+  persisted power profile was performance. Omarchy's idle plugin had no sleep
+  action. No completed hibernation or precise historical drain rate was found.
+- Added the Dell power manager, timed sleep/hibernate drop-ins, a 7% direct
+  hibernation critical-battery policy, and a cover-inhibitor override that
+  excludes EasyEffects' processing streams. See `system/dell-power/README.md`
+  for behavior, installation, diagnostics, and rollback.
+- Policy tests cover battery/AC timing, activity/inhibitor resets, low-battery
+  disk sleep, retry spacing, and real audio versus processing streams. Runtime
+  installation and physical suspend/hibernate round trips are pending: this
+  agent session cannot access the service buses or write system configuration.

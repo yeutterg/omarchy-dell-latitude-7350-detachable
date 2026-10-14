@@ -135,6 +135,7 @@ configure_internal_mic_driver
 link_tree
 prune_stale_links
 configure_easyeffects
+bash "$repo/system/dell-power/install.sh"
 enable_units
 configure_ollama
 ensure_hypr_extras_loader
