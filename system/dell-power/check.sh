@@ -33,7 +33,8 @@ if [[ ${1:-} == --sleep-test ]]; then
   else
     before=''
   fi
-  echo "Testing $mode now. Resume with the power button; this terminal should return."
+  echo "Testing $mode now. Wait at least 60 seconds AFTER the screen goes dark before pressing Power."
+  echo 'The screen can blank while sleep is still being prepared. This terminal should return after resume.'
   systemctl "$mode"
   [[ $(cat /proc/sys/kernel/random/boot_id) == "$boot" ]] || {
     echo 'Boot identity changed; session restoration was not confirmed.' >&2; exit 1;
@@ -43,5 +44,9 @@ if [[ ${1:-} == --sleep-test ]]; then
     after=$(sudo cat "$pmc")
     echo "Low-power S0 residency (microseconds): $before -> $after"
   fi
+  printf 'Last wake IRQ: '; cat /sys/power/pm_wakeup_irq
+  # The journal may not have consumed the kernel resume messages yet when
+  # systemctl returns; synchronize before reporting the evidence.
+  sudo journalctl --sync
   journalctl -b -k --since "$since" --no-pager | rg 'PM:|suspend|hibernation|resume|error|fail' || true
 fi

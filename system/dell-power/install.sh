@@ -89,4 +89,23 @@ fi
 if [[ -e $HOME/.config/systemd/user/stay-awake-agents.service ]]; then
   systemctl --user restart stay-awake-agents.service
 fi
+# Explicit opt-in; never change firmware during unattended setup.
+attribute=/sys/class/firmware-attributes/dell-wmi-sysman/attributes/PowerWarn/current_value
+if [[ -t 0 && -f $attribute ]]; then
+  current_warning=$(sudo cat "$attribute")
+  if [[ $current_warning == Enabled ]]; then
+    printf '\nThe BIOS can pause boot with a low-wattage USB-C charger.\n'
+    answer=''
+    if read -r -p 'Suppress the Dell low-wattage adapter warning? [y/N] ' answer; then
+      case $answer in
+        y|Y|yes|YES|Yes) bash "$repo/system/dell-power/adapter-warning.sh" disable ;;
+        *) echo 'Adapter warning left unchanged.' ;;
+      esac
+    else
+      echo 'Adapter warning left unchanged.'
+    fi
+  elif [[ $current_warning == Disabled ]]; then
+    echo 'BIOS adapter warnings are already disabled; left unchanged.'
+  fi
+fi
 echo 'Installed. EasyEffects is hidden; the Dell policy is active. Verify hibernate/resume before relying on overnight standby.'

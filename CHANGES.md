@@ -298,3 +298,12 @@ Detachable only. Git history has the exact diffs.
   the below-45 W adapter warning. No BIOS setting was changed automatically.
 - Updated the tablet low-battery hook to hibernate a closed, undocked tablet
   directly after releasing Stay Awake, instead of leaving it in plain suspend.
+- Interactive setup now offers to suppress the Dell low-wattage adapter warning
+  with a default-No question. Unattended setup never changes firmware. An opt-in
+  changes only `PowerWarn`, saves its prior value, and verifies the result;
+  `system/dell-power/adapter-warning.sh restore` restores the saved value.
+- Initial manual suspend returned the original process and audio still worked.
+  It was woken shortly after screen blanking; the kernel entered and exited its
+  suspended phase in the same second, with zero S0 residency. Sustained sleep
+  power savings remain unverified. The test now requests a 60-second wait and
+  synchronizes the journal before collecting kernel resume evidence.

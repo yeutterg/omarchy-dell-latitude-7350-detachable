@@ -91,20 +91,31 @@ Warning Messages**. This controls the adapter warning, not the charger's output.
 
 The same setting is exposed by this machine as
 `/sys/class/firmware-attributes/dell-wmi-sysman/attributes/PowerWarn/current_value`,
-with supported values `Enabled` and `Disabled`. To disable just that warning
-from a terminal:
+with supported values `Enabled` and `Disabled`. Interactive setup asks:
 
-```bash
-printf 'Disabled\n' | sudo tee /sys/class/firmware-attributes/dell-wmi-sysman/attributes/PowerWarn/current_value
+```text
+Suppress the Dell low-wattage adapter warning? [y/N]
 ```
 
-This firmware change is optional and is not performed by the installer.
+Enter `y` to disable it, or press Enter to leave it unchanged. Unattended setup
+never changes firmware. If already disabled, setup leaves it alone without
+asking again. Only `PowerWarn` is written, with read-back verification. The
+previous value is saved under `$XDG_STATE_HOME/dell-power/adapter-warning.previous`
+(normally `~/.local/state/dell-power/adapter-warning.previous`). Restore it with:
+
+```bash
+bash system/dell-power/adapter-warning.sh restore
+```
+
 Leave the broader **Warnings and Errors** setting alone so other errors still
 prompt. A 30 W charger will still charge slowly and might not keep up with
 heavy workloads. [Dell power requirements](https://www.dell.com/support/manuals/en-us/latitude-13-7350-detachable-laptop/latitude-7350-dtbl-owners-manual/power-requirements-of-latitude-7350-detachable?guid=guid-78f4422e-8d18-4702-a0c9-f917a5499fcf&lang=en-us),
 [Dell BIOS options](https://www.dell.com/support/manuals/en-us/latitude-13-7350-detachable-laptop/latitude-7350-dtbl-owners-manual/system-setup-options?guid=guid-160397c4-7aef-4325-82fd-f27722b46f31&lang=en-us).
 
-For each explicit sleep test, resume with the power button. Confirm the same
+For each explicit sleep test, wait at least 60 seconds after the screen goes
+dark before resuming with the power button. The initial suspend test was woken
+almost immediately after preparation and reported zero S0 residency; it does
+not establish whether sustained suspend reaches low-power S0. Confirm the same
 terminal and applications return, plus keyboard, touchpad, audio, microphone,
 Wi-Fi, and charging still work. For hibernation, confirm the kernel journal
 shows an image restored and hibernation exit rather than a fresh boot. A
