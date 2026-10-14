@@ -282,3 +282,7 @@ Detachable only. Git history has the exact diffs.
   disk sleep, retry spacing, and real audio versus processing streams. Runtime
   installation and physical suspend/hibernate round trips are pending: this
   agent session cannot access the service buses or write system configuration.
+- Corrected the installer resume-device preflight: Btrfs `findmnt MAJ:MIN`
+  reports the virtual filesystem device, not the backing block device. It now
+  resolves the swap filesystem source without its subvolume suffix and compares
+  the block device's actual major/minor numbers with `/sys/power/resume`.

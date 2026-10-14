@@ -14,7 +14,20 @@ offset=$(sudo btrfs inspect-internal map-swapfile -r /swap/swapfile)
 [[ $offset == "$(cat /sys/power/resume_offset)" ]] || {
   echo 'Swap resume offset is stale. Run omarchy-hibernation-setup and reboot first.' >&2; exit 1;
 }
-[[ $(findmnt -n -o MAJ:MIN -T /swap/swapfile) == "$(cat /sys/power/resume)" ]] || {
+# Btrfs reports a virtual filesystem MAJ:MIN (0:...) through findmnt. Resume
+# uses the backing block device instead. --nofsroot strips the subvolume suffix.
+swap_source=$(findmnt -nro SOURCE --nofsroot -T /swap/swapfile)
+swap_device=$(python - "$swap_source" <<'PY'
+import os
+import stat
+import sys
+device = os.stat(sys.argv[1])
+if not stat.S_ISBLK(device.st_mode):
+    raise SystemExit('Swap filesystem source is not a block device')
+print(f'{os.major(device.st_rdev)}:{os.minor(device.st_rdev)}')
+PY
+)
+[[ $swap_device == "$(cat /sys/power/resume)" ]] || {
   echo 'Swap resume device does not match the active root device.' >&2; exit 1;
 }
 command -v powerprofilesctl >/dev/null
