@@ -313,3 +313,7 @@ Detachable only. Git history has the exact diffs.
   it logged a model-index warning; its processing path is not yet independently
   verified after resume. The camera runtime-PM warning recurred during resume.
   Low-power S0 residency and hibernation round trips still need verification.
+- The sustained suspend's PMC counter was 3376472 before and after: no S0
+  residency accrued. Resume works, but low-power standby is not yet validated.
+  Added a read-only PMC requirements/status and device-power diagnostic report
+  to identify blockers before changing wake sources or hardware power settings.
