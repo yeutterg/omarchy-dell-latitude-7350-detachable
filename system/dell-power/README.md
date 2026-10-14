@@ -30,12 +30,34 @@ swap's actual Btrfs offset and resume device before enabling this policy.
 | 7% battery in active use | UPower hibernates directly, with low/critical warnings at 20%/10% |
 
 Manual power-profile choices persist until the next charger transition.
+The battery default applies while awake too; workloads do not switch it to
+performance. Automatic agent Stay Awake is released on the next five-second
+local status check when all agents are idle, waiting for input, exited, or
+unavailable. There is no extra 30-second completion grace. Manual Stay Awake
+and manually turning it off while a job runs remain respected. The watcher
+tracks ownership and releases its own state on clean service shutdown.
+
+The reusable tablet policy lives in
+`home/.local/lib/tablet-power/manager.py`; the Dell executable is a thin entry
+point. Sleep timing, audio filtering, charger profile transitions, and agent
+ownership are generic tablet behavior. Dell-specific hardware gating,
+Btrfs resume validation, installation, and firmware instructions stay in
+`system/dell-power`. Both are currently versioned in the Dell repo; the generic
+module can be transferred to the tablet repo without rewriting its policy.
+
+Polling stays lightweight: the power manager checks every 15 seconds and
+only queries lock state while unlocked. It skips inhibitor/audio queries while
+Stay Awake is set. Agent checks are every five seconds with a two-second total
+local query budget; no network calls or process-tree scanning. The cover
+watcher skips audio probes while Stay Awake is set.
 EasyEffects launches with `--service-mode --hide-window`. Its internal
 processing streams do not count as playback in the Dell sleep policy or the
 tablet cover inhibitor. Applications remain able to inhibit sleep, and the
 existing Omarchy pre-sleep lock service remains responsible for securing the
 session. Failed IPC probes defer automatic sleep instead of guessing idle.
 No blanket USB/audio/camera autosuspend tweaks are applied.
+The tablet low-battery hook also releases Stay Awake and hibernates a closed,
+undocked tablet directly, replacing its old plain-suspend action.
 
 ## Install and verify
 
@@ -53,6 +75,35 @@ settings, backs up the original UPower file, links the Dell user service, and
 starts the policy and hidden EasyEffects. It reloads logind rather than
 restarting it. The main repository installer also invokes it.
 
+Installed on 2026-10-13: the running service journal confirmed `AC: balanced`,
+the sleep/logind drop-ins matched, and UPower's direct hibernate action was
+installed at 7%. Rerun the installer after updates to reload the services and
+install the agent-watcher override. Physical sleep and hibernation verification
+is still pending.
+
+## Low-wattage charger warning
+
+Dell documents 27 W as the minimum to operate and charge this model; below
+45 W can produce a warning and charge more slowly. A compatible 30 W USB-PD
+charger therefore need not block boot just because it is below 45 W. In BIOS
+Advanced Setup, disable **Pre-boot Behavior → Adapter Warnings → Enable Dock
+Warning Messages**. This controls the adapter warning, not the charger's output.
+
+The same setting is exposed by this machine as
+`/sys/class/firmware-attributes/dell-wmi-sysman/attributes/PowerWarn/current_value`,
+with supported values `Enabled` and `Disabled`. To disable just that warning
+from a terminal:
+
+```bash
+printf 'Disabled\n' | sudo tee /sys/class/firmware-attributes/dell-wmi-sysman/attributes/PowerWarn/current_value
+```
+
+This firmware change is optional and is not performed by the installer.
+Leave the broader **Warnings and Errors** setting alone so other errors still
+prompt. A 30 W charger will still charge slowly and might not keep up with
+heavy workloads. [Dell power requirements](https://www.dell.com/support/manuals/en-us/latitude-13-7350-detachable-laptop/latitude-7350-dtbl-owners-manual/power-requirements-of-latitude-7350-detachable?guid=guid-78f4422e-8d18-4702-a0c9-f917a5499fcf&lang=en-us),
+[Dell BIOS options](https://www.dell.com/support/manuals/en-us/latitude-13-7350-detachable-laptop/latitude-7350-dtbl-owners-manual/system-setup-options?guid=guid-160397c4-7aef-4325-82fd-f27722b46f31&lang=en-us).
+
 For each explicit sleep test, resume with the power button. Confirm the same
 terminal and applications return, plus keyboard, touchpad, audio, microphone,
 Wi-Fi, and charging still work. For hibernation, confirm the kernel journal
@@ -65,9 +116,12 @@ Policy checks: `python system/dell-power/test-policy.py`.
 ## Rollback
 
 Disable `dell-power-manager.service`, remove the two `60-dell-*.conf` system
-drop-ins and the `stay-awake-cover.service.d/60-dell-audio.conf` user override,
+drop-ins and the `stay-awake-cover.service.d/60-dell-audio.conf` and
+`stay-awake-agents.service.d/60-tablet-power.conf` user overrides,
 restore `/etc/UPower/UPower.conf.pre-dell-power`, then reload logind, restart
-UPower, reload the user service manager, and restart `stay-awake-cover.service`.
+UPower, reload the user service manager, and restart `stay-awake-cover.service`
+and `stay-awake-agents.service`. Restore the previous low-battery hook from the
+tablet repo (or its `.pre-dell-power` backup if it was a real file).
 The existing lock, power-button, and brightness behavior is unchanged.
 
 References: [systemd 261 sleep configuration](https://github.com/systemd/systemd/blob/v261/man/systemd-sleep.conf.xml),

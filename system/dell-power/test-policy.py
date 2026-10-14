@@ -5,9 +5,12 @@ from pathlib import Path
 import unittest
 from unittest.mock import patch
 import sys
+import tempfile
+import contextlib
+import io
 sys.dont_write_bytecode = True
 
-path = Path(__file__).resolve().parents[2] / 'home/.local/bin/dell-power-manager'
+path = Path(__file__).resolve().parents[2] / 'home/.local/lib/tablet-power/manager.py'
 loader = importlib.machinery.SourceFileLoader('dell_power', str(path))
 spec = importlib.util.spec_from_loader(loader.name, loader)
 module = importlib.util.module_from_spec(spec)
@@ -76,6 +79,55 @@ class PolicyTests(unittest.TestCase):
         with patch.object(module, 'command', return_value='{}'):
             with self.assertRaises(RuntimeError):
                 module.snapshot(False, 50)
+
+    def test_unlocked_probe_skips_expensive_queries(self):
+        with patch.object(module, 'command', return_value='{"secure":false}') as probe:
+            self.assertFalse(module.snapshot(False, 50)['locked'])
+            probe.assert_called_once_with('omarchy-shell', 'lock', 'status')
+
+    def test_awake_ownership_preserves_manual_toggle(self):
+        with tempfile.TemporaryDirectory() as directory:
+            marker = Path(directory) / 'auto'
+            awake = Path(directory) / 'awake'
+            awake.touch()
+            marker.write_text(str(awake.stat().st_mtime_ns))
+            self.assertTrue(module.owns_awake(marker, awake))
+            # A user setting Stay Awake again refreshes the state identity.
+            import os
+            stamp = awake.stat().st_mtime_ns + 1000000000
+            os.utime(awake, ns=(stamp, stamp))
+            self.assertFalse(module.owns_awake(marker, awake))
+            awake.unlink()
+            self.assertFalse(module.owns_awake(marker, awake))
+
+    def test_agent_completion_releases_on_next_poll_without_grace(self):
+        with tempfile.TemporaryDirectory() as directory:
+            home = Path(directory)
+            awake = home / '.local/state/omarchy/indicators/stay-awake'
+            awake.parent.mkdir(parents=True)
+            calls = []
+
+            def toggle(*args):
+                calls.append(args)
+                if args[-1] == 'stay-awake':
+                    awake.touch()
+                else:
+                    awake.unlink(missing_ok=True)
+                return ''
+
+            with patch.object(module.Path, 'home', return_value=home), \
+                 patch.dict(module.os.environ, {'XDG_STATE_HOME': str(home / '.local/state')}), \
+                 patch.object(module, 'agent_working', side_effect=[True, False]), \
+                 patch.object(module, 'power_state', return_value=(False, 50)), \
+                 patch.object(module, 'command', side_effect=toggle), \
+                 patch.object(module.signal, 'signal'), \
+                 patch.object(module.time, 'sleep', side_effect=[None, KeyboardInterrupt]), \
+                 contextlib.redirect_stdout(io.StringIO()):
+                with self.assertRaises(KeyboardInterrupt):
+                    module.agents_inhibitor()
+            self.assertEqual(calls, [('omarchy-toggle-idle', 'stay-awake'),
+                                     ('omarchy-toggle-idle', 'allow-idle')])
+            self.assertFalse(awake.exists())
 
 
 if __name__ == '__main__':

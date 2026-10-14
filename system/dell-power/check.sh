@@ -6,7 +6,7 @@ printf 'Resume device/offset: '; paste -sd ' ' /sys/power/resume /sys/power/resu
 cat /proc/swaps
 busctl call org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager CanHibernate
 powerprofilesctl get
-systemctl --user --no-pager status easyeffects.service dell-power-manager.service || true
+systemctl --user --no-pager status easyeffects.service dell-power-manager.service stay-awake-agents.service stay-awake-cover.service || true
 omarchy-shell lock status
 omarchy-shell idle status
 systemd-inhibit --list --no-pager

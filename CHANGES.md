@@ -286,3 +286,15 @@ Detachable only. Git history has the exact diffs.
   reports the virtual filesystem device, not the backing block device. It now
   resolves the swap filesystem source without its subvolume suffix and compares
   the block device's actual major/minor numbers with `/sys/power/resume`.
+- User completed installation; the service log confirmed AC balanced, and the
+  sleep/logind/UPower configuration matched the intended policy. Physical sleep
+  round trips remain pending.
+- Separated reusable tablet policy into `.local/lib/tablet-power/manager.py`.
+  The Dell entry point and hardware-specific installer stay in this repo.
+  Added an override for the tablet agent watcher: five-second local checks,
+  no completion grace, automatic ownership cleanup, and manual-toggle respect.
+  Reduced unnecessary audio/inhibitor polling during active use or Stay Awake.
+- Documented the optional Dell `PowerWarn` firmware setting for suppressing
+  the below-45 W adapter warning. No BIOS setting was changed automatically.
+- Updated the tablet low-battery hook to hibernate a closed, undocked tablet
+  directly after releasing Stay Awake, instead of leaving it in plain suspend.

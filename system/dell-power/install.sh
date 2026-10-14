@@ -41,10 +41,15 @@ link_file() {
   ln -sfn -- "$repo/home/$relative" "$target"
 }
 link_file .local/bin/dell-power-manager
+link_file .local/lib/tablet-power/manager.py
 link_file .config/systemd/user/dell-power-manager.service
 link_file .config/systemd/user/easyeffects.service
+link_file .config/omarchy/hooks/battery-low.d/stay-awake-off
 if [[ -e $HOME/.config/systemd/user/stay-awake-cover.service ]]; then
   link_file .config/systemd/user/stay-awake-cover.service.d/60-dell-audio.conf
+fi
+if [[ -e $HOME/.config/systemd/user/stay-awake-agents.service ]]; then
+  link_file .config/systemd/user/stay-awake-agents.service.d/60-tablet-power.conf
 fi
 
 sudo install -Dm644 "$repo/system/dell-power/60-dell-sleep.conf" /etc/systemd/sleep.conf.d/60-dell-sleep.conf
@@ -80,5 +85,8 @@ systemctl --user enable --now easyeffects.service dell-power-manager.service
 systemctl --user restart easyeffects.service dell-power-manager.service
 if [[ -e $HOME/.config/systemd/user/stay-awake-cover.service ]]; then
   systemctl --user restart stay-awake-cover.service
+fi
+if [[ -e $HOME/.config/systemd/user/stay-awake-agents.service ]]; then
+  systemctl --user restart stay-awake-agents.service
 fi
 echo 'Installed. EasyEffects is hidden; the Dell policy is active. Verify hibernate/resume before relying on overnight standby.'

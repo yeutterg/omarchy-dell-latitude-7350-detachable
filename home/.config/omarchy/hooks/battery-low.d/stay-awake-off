@@ -1,0 +1,11 @@
+#!/bin/bash
+# Generic tablet safety valve: release Stay Awake and save a closed tablet to
+# disk directly. Plain suspend here previously left low charge in RAM sleep.
+set -euo pipefail
+if omarchy-toggle-idle status | grep -q '"enabled":true'; then
+  omarchy-toggle-idle allow-idle
+  omarchy-notification-send -u critical 'Stay Awake turned off' "Battery is at ${1:-low}%" || true
+  if omarchy-hw-laptop-closed && ! omarchy-hw-external-monitors && ! omarchy-power-present; then
+    systemctl hibernate
+  fi
+fi
