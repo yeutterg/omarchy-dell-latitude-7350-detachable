@@ -116,6 +116,8 @@ For each explicit sleep test, wait at least 60 seconds after the screen goes
 dark before resuming with the power button. The initial suspend test was woken
 almost immediately after preparation and reported zero S0 residency; it does
 not establish whether sustained suspend reaches low-power S0. Confirm the same
+terminal after resume. A follow-up stayed in s2idle for 77 seconds and resumed
+successfully; its actual low-power residency still needs checking. Confirm the
 terminal and applications return, plus keyboard, touchpad, audio, microphone,
 Wi-Fi, and charging still work. For hibernation, confirm the kernel journal
 shows an image restored and hibernation exit rather than a fresh boot. A

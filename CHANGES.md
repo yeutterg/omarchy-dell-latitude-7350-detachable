@@ -307,3 +307,9 @@ Detachable only. Git history has the exact diffs.
   suspended phase in the same second, with zero S0 residency. Sustained sleep
   power savings remain unverified. The test now requests a 60-second wait and
   synchronizes the journal before collecting kernel resume evidence.
+- A second suspend stayed in s2idle from 22:26:35 to 22:27:52 (77 seconds),
+  then resumed successfully. Agent-watcher logs also confirmed automatic Stay
+  Awake was released when agents stopped. EasyEffects remained running, though
+  it logged a model-index warning; its processing path is not yet independently
+  verified after resume. The camera runtime-PM warning recurred during resume.
+  Low-power S0 residency and hibernation round trips still need verification.
